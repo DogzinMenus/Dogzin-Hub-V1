@@ -1,7 +1,21 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
 
--- Tabs
+-- Criar a UI, mas manter oculta inicialmente
+local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
+Window.MainFrame.Visible = false -- Oculta ao criar
+
+-- Toggle para abrir/fechar a UI
+local toggleKey = Enum.KeyCode.Insert -- Você pode mudar a tecla
+
+local userInputService = game:GetService("UserInputService")
+userInputService.InputBegan:Connect(function(input, gameProcessed)
+    if gameProcessed then return end
+    if input.KeyCode == toggleKey then
+        Window.MainFrame.Visible = not Window.MainFrame.Visible
+    end
+end)
+
+-- Criando as Tabs normalmente
 local TabMain = Window:NewTab("Main")
 local TabFarm = Window:NewTab("Auto Farm")
 local TabBoss = Window:NewTab("Bosses")
@@ -9,6 +23,11 @@ local TabMastery = Window:NewTab("Mastery")
 local TabTP = Window:NewTab("Teleport")
 local TabMisc = Window:NewTab("Misc")
 local TabVisual = Window:NewTab("Visual")
+
+-- Para o conteúdo rolável, Kavo UI não tem scroll nativo nas tabs, mas as tabs geralmente têm bastante espaço.
+-- Se precisar de muitos elementos, a Kavo UI já adiciona um scrollbar automaticamente.
+-- Se quiser um container rolável dentro de uma tab, precisaríamos criar um ScrollingFrame manualmente.
+-- Mas como o Kavo UI já trata isso, vamos manter assim para simplicidade.
 
 -- Fast Attack
 TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
