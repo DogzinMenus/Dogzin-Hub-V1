@@ -1,96 +1,125 @@
+-- Carregar Kavo UI
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
+
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Criar ScreenGui pai
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "DogzinHubGui"
-screenGui.Parent = playerGui
-screenGui.ResetOnSpawn = false
-
--- Botão para toggle abrir/fechar
+-- Criar botão toggle
 local toggleButton = Instance.new("ImageButton")
-toggleButton.Name = "ToggleButton"
-toggleButton.Parent = screenGui
+toggleButton.Name = "ToggleDogzinHub"
 toggleButton.Size = UDim2.new(0, 50, 0, 50)
 toggleButton.Position = UDim2.new(0, 10, 0, 10)
 toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-toggleButton.Image = "rbxassetid://7072719734"  -- Troque para o ícone que quiser
+toggleButton.Image = "rbxassetid://7072719734" -- Ícone personalizável
 toggleButton.ImageColor3 = Color3.new(1, 1, 1)
-toggleButton.AutoButtonColor = true
+toggleButton.Parent = playerGui
+toggleButton.AutoButtonColor = false
+toggleButton.BorderSizePixel = 0
 
--- Frame principal onde a Kavo UI vai ficar (com rolagem)
-local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
-mainFrame.Parent = screenGui
-mainFrame.Size = UDim2.new(0, 400, 0, 500)
-mainFrame.Position = UDim2.new(0, 70, 0, 10)
-mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-mainFrame.BorderSizePixel = 0
-mainFrame.Visible = false -- inicia escondido
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
 
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Name = "ScrollingFrame"
-scrollingFrame.Parent = mainFrame
-scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Altura do conteúdo para rolagem
-scrollingFrame.ScrollBarThickness = 8
-scrollingFrame.BackgroundTransparency = 1
-
--- CRIAR a UI da Kavo LIB dentro do ScrollingFrame
-
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-
--- IMPORTANTÍSSIMO: A Kavo UI cria a Window como uma ScreenGui no PlayerGui por padrão.
--- Aqui, vamos forçar ela a ser filha do scrollingFrame para entrar dentro do nosso frame rolável.
-
-local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
-
--- Depois que criar a Window, pegar o ScreenGui da Kavo UI e colocar dentro do scrollingFrame
--- (supondo que a Window possui uma ScreenGui pai)
-
--- Encontrar o ScreenGui criado pela Kavo
+-- Esperar tela do Kavo aparecer
 local kavoScreenGui
-for _, gui in pairs(playerGui:GetChildren()) do
-    if gui:IsA("ScreenGui") and gui.Name == "Kavo-UI-Library" then
-        kavoScreenGui = gui
-        break
+repeat
+    for _, gui in pairs(playerGui:GetChildren()) do
+        if gui:IsA("ScreenGui") and gui.Name == "Kavo-UI-Library" then
+            kavoScreenGui = gui
+            break
+        end
     end
+    wait()
+until kavoScreenGui
+
+local mainFrame = kavoScreenGui:FindFirstChildWhichIsA("Frame")
+if not mainFrame then
+    warn("Frame principal do Kavo UI não encontrado.")
+    return
 end
 
-if kavoScreenGui then
-    kavoScreenGui.Parent = scrollingFrame
-    -- Ajustar posição para ficar dentro do scrollingFrame
-    kavoScreenGui.ResetOnSpawn = false
-    kavoScreenGui.Enabled = true
-    kavoScreenGui.DisplayOrder = 10
+-- Criar a barra de arrasto (drag bar)
+local dragBar = Instance.new("Frame")
+dragBar.Name = "DragBar"
+dragBar.Size = UDim2.new(1, 0, 0, 25)
+dragBar.Position = UDim2.new(0, 0, 0, 0)
+dragBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+dragBar.BorderSizePixel = 0
+dragBar.Parent = mainFrame
 
-    -- Ajustar propriedades da Kavo UI pra se encaixar no scrollingFrame
-    kavoScreenGui.IgnoreGuiInset = true
+-- Deixar dragBar sempre na frente
+dragBar.ZIndex = 1000
 
-    -- Reduzir tamanho da janela da Kavo UI para caber dentro do scrollingFrame
-    local mainWindow = kavoScreenGui:FindFirstChildWhichIsA("Frame")
-    if mainWindow then
-        mainWindow.Size = UDim2.new(1, 0, 1, 0)
-        mainWindow.Position = UDim2.new(0, 0, 0, 0)
-        mainWindow.ClipsDescendants = false
-    end
+-- Drag pela barra
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    mainFrame.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
 end
 
--- Toggle abrir/fechar
-local frameOpen = false
-toggleButton.MouseButton1Click:Connect(function()
-    frameOpen = not frameOpen
-    mainFrame.Visible = frameOpen
-    -- Muda cor para indicar aberto/fechado
-    if frameOpen then
-        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-    else
-        toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+dragBar.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
     end
 end)
 
--- Criar suas abas e toggles normalmente, por exemplo:
+dragBar.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
 
+UserInputService.InputChanged:Connect(function(input)
+    if dragging and input == dragInput then
+        update(input)
+    end
+end)
+
+-- Toggle do Frame
+local isOpen = true
+mainFrame.Visible = true
+
+local tweenInfo = TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+
+local function toggleUI()
+    isOpen = not isOpen
+    if isOpen then
+        mainFrame.Visible = true
+        mainFrame.ClipsDescendants = false
+        local tween = TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 0})
+        tween:Play()
+    else
+        local tween = TweenService:Create(mainFrame, tweenInfo, {BackgroundTransparency = 1})
+        tween:Play()
+        tween.Completed:Connect(function()
+            mainFrame.Visible = false
+        end)
+    end
+
+    local targetColor = isOpen and Color3.fromRGB(70, 70, 70) or Color3.fromRGB(40, 40, 40)
+    TweenService:Create(toggleButton, tweenInfo, {BackgroundColor3 = targetColor}):Play()
+end
+
+toggleButton.MouseButton1Click:Connect(toggleUI)
+
+-- Exemplo de aba e toggle (seu conteúdo vem aqui)
 local TabMain = Window:NewTab("Main")
 TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
     _G.FastAttack = v
@@ -99,5 +128,3 @@ TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
         wait()
     end
 end)
-
--- Repita seu código normalmente para criar o resto das abas etc.
