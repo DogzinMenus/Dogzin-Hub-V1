@@ -1,0 +1,46 @@
+-- Nome da GUI alterado para "Dogzin Menus"
+local gui = Instance.new("ScreenGui")
+gui.Name = "Dogzin Menus"
+gui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+-- Checagem do Mundo
+if game.PlaceId == 2753915549 then
+    World1 = true
+elseif game.PlaceId == 4442272183 then
+    World2 = true
+elseif game.PlaceId == 7449423635 then
+    World3 = true
+else
+    game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
+end
+
+-- Função para checar e configurar a quest de acordo com o nível
+function CheckQuest()
+    local MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
+
+    if World1 then
+        if MyLevel <= 9 then
+            Mon = "Bandit"
+            LevelQuest = 1
+            NameQuest = "BanditQuest1"
+            NameMon = "Bandit"
+            CFrameQuest = CFrame.new(1059.37, 15.45, 1550.42)
+            CFrameMon = CFrame.new(1045.96, 27.00, 1560.82)
+        elseif MyLevel <= 14 then
+            Mon = "Monkey"
+            LevelQuest = 1
+            NameQuest = "JungleQuest"
+            NameMon = "Monkey"
+            CFrameQuest = CFrame.new(-1598.08, 35.55, 153.56)
+            CFrameMon = CFrame.new(-1448.67, 45.85, 159.55)
+        -- Adicione os próximos níveis e inimigos conforme necessário
+        end
+    elseif World2 then
+        -- Adicione lógica para o Segundo Mundo
+    elseif World3 then
+        -- Adicione lógica para o Terceiro Mundo
+    end
+end
+
+-- Exemplo de chamada da função
+CheckQuest()
