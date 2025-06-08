@@ -1,33 +1,84 @@
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
 
-if game.PlaceId == 2753915549 then
-    World1 = true
-elseif game.PlaceId == 4442272183 then
-    World2 = true
-elseif game.PlaceId == 7449423635 then
-    World3 = true
-else
-    game:GetService("Players").LocalPlayer:Kick("Do not Support, Please wait...")
-end
+-- Tabs
+local TabMain = Window:NewTab("Main")
+local TabFarm = Window:NewTab("Auto Farm")
+local TabBoss = Window:NewTab("Bosses")
+local TabMastery = Window:NewTab("Mastery")
+local TabTP = Window:NewTab("Teleport")
+local TabMisc = Window:NewTab("Misc")
+local TabVisual = Window:NewTab("Visual")
 
-function CheckQuest()
-    MyLevel = game:GetService("Players").LocalPlayer.Data.Level.Value
-
-    if World1 then
-        if MyLevel == 1 or MyLevel <= 9 then
-            Mon = "Bandit"
-            LevelQuest = 1
-            NameQuest = "BanditQuest1"
-            NameMon = "Bandit"
-            CFrameQuest = CFrame.new(1059.37195, 15.4495068, 1550.4231, 0.939700544, -0, -0.341998369, 0, 1, -0, 0.341998369, 0, 0.939700544)
-            CFrameMon = CFrame.new(1045.962646484375, 27.00250816345215, 1560.8203125)
-        
-        elseif MyLevel == 10 or MyLevel <= 14 then
-            Mon = "Monkey"
-            LevelQuest = 1
-            NameQuest = "JungleQuest"
-            NameMon = "Monkey"
-            CFrameQuest = CFrame.new(-1598.08911, 35.5501…) -- valores incompletos
-            CFrameMon = CFrame.new(...) -- valores incompletos
-        end
+-- Fast Attack
+TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
+    _G.FastAttack = v
+    while _G.FastAttack do
+        -- Coloque seu código de ataque rápido aqui
+        wait()
     end
-end
+end)
+
+-- Auto Kill Boss
+TabBoss:NewDropdown("Selecionar Boss", "Escolha um Boss para farmar", {"Boss 1", "Boss 2", "Boss 3"}, function(selected)
+    _G.SelectedBoss = selected
+end)
+TabBoss:NewToggle("Auto Kill Boss", "Ataca automaticamente o boss selecionado", function(v)
+    _G.AutoKillBoss = v
+    while _G.AutoKillBoss do
+        -- Código para atacar boss automaticamente
+        wait()
+    end
+end)
+
+-- Auto Farm Mastery
+TabMastery:NewToggle("Auto Farm Mastery", "Farmar maestria automaticamente", function(v)
+    _G.FarmMastery = v
+    while _G.FarmMastery do
+        -- Código para farmar maestria
+        wait()
+    end
+end)
+
+-- Sniper de Frutas
+TabMisc:NewToggle("Sniper de Frutas", "Pega frutas automaticamente do mapa", function(v)
+    _G.FruitSniper = v
+    while _G.FruitSniper do
+        -- Código para pegar frutas automaticamente
+        wait()
+    end
+end)
+
+-- Teleporte para ilhas
+TabTP:NewButton("Ir para Sky Island", "Teleporta para Sky Island", function()
+    game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-7900, 5587, -2212))
+end)
+
+-- Trocar Sea
+TabTP:NewDropdown("Trocar Sea", "Escolha um Sea", {"First", "Second", "Third"}, function(sea)
+    local seas = {
+        ["First"] = 2753915549,
+        ["Second"] = 4442272183,
+        ["Third"] = 7449423635
+    }
+    if seas[sea] then
+        game:GetService("TeleportService"):Teleport(seas[sea], game.Players.LocalPlayer)
+    end
+end)
+
+-- Visual ESP
+TabVisual:NewToggle("Mostrar Jogadores", "Mostra todos os jogadores com ESP", function(v)
+    _G.ShowPlayersESP = v
+    while _G.ShowPlayersESP do
+        -- Código para mostrar jogadores
+        wait()
+    end
+end)
+
+TabVisual:NewToggle("Mostrar Frutas", "Mostra todas as frutas no mapa", function(v)
+    _G.ShowFruitsESP = v
+    while _G.ShowFruitsESP do
+        -- Código para mostrar frutas
+        wait()
+    end
+end)
