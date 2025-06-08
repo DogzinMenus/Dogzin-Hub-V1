@@ -1,53 +1,58 @@
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
 local player = Players.LocalPlayer
 local mouse = player:GetMouse()
 
+-- Estados
+local noclip = false
+local autoKill = false
+local fastAttack = false
+
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "DogzinHub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Botão 50x50 que abre/fecha o mainFrame
+-- Botão de abrir/fechar
 local toggleButton = Instance.new("TextButton")
-toggleButton.Name = "OpenCloseButton"
 toggleButton.Size = UDim2.new(0, 50, 0, 50)
 toggleButton.Position = UDim2.new(0, 10, 0.5, -25)
 toggleButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
 toggleButton.Text = "+"
+toggleButton.Font = Enum.Font.GothamBold
 toggleButton.TextSize = 30
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.Font = Enum.Font.GothamBold
 toggleButton.Parent = screenGui
 
--- Frame principal
+-- Main Frame
 local mainFrame = Instance.new("Frame")
-mainFrame.Name = "MainFrame"
 mainFrame.Size = UDim2.new(0, 400, 0, 350)
 mainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
 mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 mainFrame.BorderSizePixel = 0
-mainFrame.Parent = screenGui
+mainFrame.Visible = true
 mainFrame.Active = true
 mainFrame.Draggable = true
+mainFrame.Parent = screenGui
 
 toggleButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = not mainFrame.Visible
 	toggleButton.Text = mainFrame.Visible and "-" or "+"
 end)
 
+-- Título
 local title = Instance.new("TextLabel")
-title.Name = "Title"
 title.Size = UDim2.new(1, 0, 0, 40)
 title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-title.BorderSizePixel = 0
 title.Text = "DogzinHub"
 title.Font = Enum.Font.GothamBold
 title.TextSize = 24
 title.TextColor3 = Color3.new(1, 1, 1)
 title.Parent = mainFrame
 
+-- Conteúdo
 local contentFrame = Instance.new("Frame")
-contentFrame.Name = "ContentFrame"
 contentFrame.Size = UDim2.new(1, 0, 1, -40)
 contentFrame.Position = UDim2.new(0, 0, 0, 40)
 contentFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
@@ -55,99 +60,82 @@ contentFrame.BorderSizePixel = 0
 contentFrame.Parent = mainFrame
 
 local sideBar = Instance.new("Frame")
-sideBar.Name = "SideBar"
 sideBar.Size = UDim2.new(0, 100, 1, 0)
 sideBar.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-sideBar.BorderSizePixel = 0
 sideBar.Parent = contentFrame
 
 local tabContent = Instance.new("Frame")
-tabContent.Name = "TabContent"
 tabContent.Size = UDim2.new(1, -100, 1, 0)
 tabContent.Position = UDim2.new(0, 100, 0, 0)
 tabContent.BackgroundTransparency = 1
 tabContent.Parent = contentFrame
 
-local function createTabButton(name, positionY)
+-- Funções auxiliares
+local function createTabButton(name, y)
 	local btn = Instance.new("TextButton")
-	btn.Name = name .. "Button"
-	btn.Size = UDim2.new(1, 0, 0, 40)
-	btn.Position = UDim2.new(0, 0, 0, positionY)
-	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	btn.BorderSizePixel = 0
 	btn.Text = name
 	btn.Font = Enum.Font.Gotham
 	btn.TextSize = 18
 	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.Size = UDim2.new(1, 0, 0, 40)
+	btn.Position = UDim2.new(0, 0, 0, y)
 	btn.Parent = sideBar
 	return btn
 end
 
-local function createToggle(name, positionY, parent, callback)
-	local toggleFrame = Instance.new("Frame")
-	toggleFrame.Size = UDim2.new(1, -20, 0, 30)
-	toggleFrame.Position = UDim2.new(0, 10, 0, positionY)
-	toggleFrame.BackgroundTransparency = 1
-	toggleFrame.Parent = parent
+local function createToggle(name, y, parent, callback)
+	local frame = Instance.new("Frame")
+	frame.Size = UDim2.new(1, -20, 0, 30)
+	frame.Position = UDim2.new(0, 10, 0, y)
+	frame.BackgroundTransparency = 1
+	frame.Parent = parent
 
-	local toggleLabel = Instance.new("TextLabel")
-	toggleLabel.Size = UDim2.new(0.7, 0, 1, 0)
-	toggleLabel.BackgroundTransparency = 1
-	toggleLabel.Text = name
-	toggleLabel.TextColor3 = Color3.new(1, 1, 1)
-	toggleLabel.Font = Enum.Font.Gotham
-	toggleLabel.TextSize = 18
-	toggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	toggleLabel.Parent = toggleFrame
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(0.7, 0, 1, 0)
+	label.Text = name
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.BackgroundTransparency = 1
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 18
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = frame
 
-	local toggleBtn = Instance.new("TextButton")
-	toggleBtn.Size = UDim2.new(0, 40, 0, 20)
-	toggleBtn.Position = UDim2.new(1, -45, 0.5, -10)
-	toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-	toggleBtn.Text = "Off"
-	toggleBtn.Font = Enum.Font.Gotham
-	toggleBtn.TextSize = 16
-	toggleBtn.TextColor3 = Color3.new(1, 1, 1)
-	toggleBtn.Parent = toggleFrame
+	local btn = Instance.new("TextButton")
+	btn.Size = UDim2.new(0, 40, 0, 20)
+	btn.Position = UDim2.new(1, -45, 0.5, -10)
+	btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+	btn.Text = "Off"
+	btn.Font = Enum.Font.Gotham
+	btn.TextSize = 16
+	btn.TextColor3 = Color3.new(1, 1, 1)
+	btn.Parent = frame
 
 	local toggled = false
-	toggleBtn.MouseButton1Click:Connect(function()
+	btn.MouseButton1Click:Connect(function()
 		toggled = not toggled
-		if toggled then
-			toggleBtn.Text = "On"
-			toggleBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 0)
-		else
-			toggleBtn.Text = "Off"
-			toggleBtn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-		end
-		if callback then
-			callback(toggled)
-		end
+		btn.Text = toggled and "On" or "Off"
+		btn.BackgroundColor3 = toggled and Color3.fromRGB(0, 170, 0) or Color3.fromRGB(70, 70, 70)
+		if callback then callback(toggled) end
 	end)
 end
 
+-- Tabs
 local tabs = {}
 
--- Aba Main
 local mainTab = Instance.new("Frame")
-mainTab.Name = "MainTab"
 mainTab.Size = UDim2.new(1, 0, 1, 0)
 mainTab.BackgroundTransparency = 1
 mainTab.Visible = true
 mainTab.Parent = tabContent
 tabs["Main"] = mainTab
 
--- Aba Settings
 local settingsTab = Instance.new("Frame")
-settingsTab.Name = "SettingsTab"
 settingsTab.Size = UDim2.new(1, 0, 1, 0)
 settingsTab.BackgroundTransparency = 1
 settingsTab.Visible = false
 settingsTab.Parent = tabContent
 tabs["Settings"] = settingsTab
-
-local mainBtn = createTabButton("Main", 10)
-local settingsBtn = createTabButton("Settings", 60)
 
 local function switchTab(tabName)
 	for _, v in pairs(tabs) do
@@ -156,25 +144,74 @@ local function switchTab(tabName)
 	tabs[tabName].Visible = true
 end
 
-mainBtn.MouseButton1Click:Connect(function()
-	switchTab("Main")
+-- Botões das abas
+local mainBtn = createTabButton("Main", 10)
+local settingsBtn = createTabButton("Settings", 60)
+mainBtn.MouseButton1Click:Connect(function() switchTab("Main") end)
+settingsBtn.MouseButton1Click:Connect(function() switchTab("Settings") end)
+
+-- Funções reais
+RunService.Stepped:Connect(function()
+	if noclip and player.Character then
+		for _, part in pairs(player.Character:GetDescendants()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
 end)
 
-settingsBtn.MouseButton1Click:Connect(function()
-	switchTab("Settings")
-end)
+local function attackBoss()
+	coroutine.wrap(function()
+		while autoKill do
+			task.wait()
+			local boss = nil
+			for _, v in pairs(workspace.Enemies:GetChildren()) do
+				if v:FindFirstChild("HumanoidRootPart") then
+					boss = v
+					break
+				end
+			end
+			if boss and player.Character then
+				player.Character:PivotTo(boss.HumanoidRootPart.CFrame * CFrame.new(0, 0, 5))
+				local tool = player.Character:FindFirstChildOfClass("Tool")
+				if tool and tool:FindFirstChild("RemoteFunction") then
+					pcall(function()
+						tool.RemoteFunction:InvokeServer("hit", boss)
+					end)
+				end
+			end
+		end
+	end)()
+end
 
--- Toggles Main (funções úteis)
+local function doFastAttack()
+	coroutine.wrap(function()
+		while fastAttack do
+			task.wait(0.15)
+			local tool = player.Character and player.Character:FindFirstChildOfClass("Tool")
+			if tool and tool:FindFirstChild("RemoteFunction") then
+				pcall(function()
+					tool.RemoteFunction:InvokeServer("hit")
+				end)
+			end
+		end
+	end)()
+end
+
+-- Toggles funcionais
 createToggle("AutoFarm", 10, mainTab, function(state)
 	print("AutoFarm toggled:", state)
 end)
 
 createToggle("Fast Attack", 50, mainTab, function(state)
-	print("Fast Attack toggled:", state)
+	fastAttack = state
+	if fastAttack then doFastAttack() end
 end)
 
 createToggle("Kill Boss", 90, mainTab, function(state)
-	print("Kill Boss toggled:", state)
+	autoKill = state
+	if autoKill then attackBoss() end
 end)
 
 createToggle("ESP Players", 130, mainTab, function(state)
@@ -182,23 +219,22 @@ createToggle("ESP Players", 130, mainTab, function(state)
 end)
 
 createToggle("Hitbox Plus", 170, mainTab, function(state)
-	print("Hitbox Plus toggled:", state)
+	print("Hitbox toggled:", state)
 end)
 
 createToggle("Auto Collect", 210, mainTab, function(state)
 	print("Auto Collect toggled:", state)
 end)
 
--- Toggles Settings (teleporte e noclip)
 createToggle("NoClip", 10, settingsTab, function(state)
-	print("NoClip toggled:", state)
+	noclip = state
 end)
 
 createToggle("Teleport", 50, settingsTab, function(state)
 	print("Teleport toggled:", state)
 end)
 
--- Botão fechar
+-- Botão de fechar
 local closeBtn = Instance.new("TextButton")
 closeBtn.Size = UDim2.new(0, 30, 0, 30)
 closeBtn.Position = UDim2.new(1, -35, 0, 5)
@@ -208,7 +244,6 @@ closeBtn.Font = Enum.Font.GothamBold
 closeBtn.TextSize = 20
 closeBtn.TextColor3 = Color3.new(1, 1, 1)
 closeBtn.Parent = mainFrame
-
 closeBtn.MouseButton1Click:Connect(function()
 	screenGui:Destroy()
 end)
