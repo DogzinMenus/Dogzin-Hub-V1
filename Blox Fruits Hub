@@ -1,103 +1,103 @@
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Criar ScreenGui pai
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "DogzinHubGui"
+screenGui.Parent = playerGui
+screenGui.ResetOnSpawn = false
+
+-- Botão para toggle abrir/fechar
+local toggleButton = Instance.new("ImageButton")
+toggleButton.Name = "ToggleButton"
+toggleButton.Parent = screenGui
+toggleButton.Size = UDim2.new(0, 50, 0, 50)
+toggleButton.Position = UDim2.new(0, 10, 0, 10)
+toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+toggleButton.Image = "rbxassetid://7072719734"  -- Troque para o ícone que quiser
+toggleButton.ImageColor3 = Color3.new(1, 1, 1)
+toggleButton.AutoButtonColor = true
+
+-- Frame principal onde a Kavo UI vai ficar (com rolagem)
+local mainFrame = Instance.new("Frame")
+mainFrame.Name = "MainFrame"
+mainFrame.Parent = screenGui
+mainFrame.Size = UDim2.new(0, 400, 0, 500)
+mainFrame.Position = UDim2.new(0, 70, 0, 10)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 0
+mainFrame.Visible = false -- inicia escondido
+
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Name = "ScrollingFrame"
+scrollingFrame.Parent = mainFrame
+scrollingFrame.Size = UDim2.new(1, 0, 1, 0)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 2, 0) -- Altura do conteúdo para rolagem
+scrollingFrame.ScrollBarThickness = 8
+scrollingFrame.BackgroundTransparency = 1
+
+-- CRIAR a UI da Kavo LIB dentro do ScrollingFrame
+
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 
--- Criar a UI, mas manter oculta inicialmente
+-- IMPORTANTÍSSIMO: A Kavo UI cria a Window como uma ScreenGui no PlayerGui por padrão.
+-- Aqui, vamos forçar ela a ser filha do scrollingFrame para entrar dentro do nosso frame rolável.
+
 local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
-Window.MainFrame.Visible = false -- Oculta ao criar
 
--- Toggle para abrir/fechar a UI
-local toggleKey = Enum.KeyCode.Insert -- Você pode mudar a tecla
+-- Depois que criar a Window, pegar o ScreenGui da Kavo UI e colocar dentro do scrollingFrame
+-- (supondo que a Window possui uma ScreenGui pai)
 
-local userInputService = game:GetService("UserInputService")
-userInputService.InputBegan:Connect(function(input, gameProcessed)
-    if gameProcessed then return end
-    if input.KeyCode == toggleKey then
-        Window.MainFrame.Visible = not Window.MainFrame.Visible
+-- Encontrar o ScreenGui criado pela Kavo
+local kavoScreenGui
+for _, gui in pairs(playerGui:GetChildren()) do
+    if gui:IsA("ScreenGui") and gui.Name == "Kavo-UI-Library" then
+        kavoScreenGui = gui
+        break
+    end
+end
+
+if kavoScreenGui then
+    kavoScreenGui.Parent = scrollingFrame
+    -- Ajustar posição para ficar dentro do scrollingFrame
+    kavoScreenGui.ResetOnSpawn = false
+    kavoScreenGui.Enabled = true
+    kavoScreenGui.DisplayOrder = 10
+
+    -- Ajustar propriedades da Kavo UI pra se encaixar no scrollingFrame
+    kavoScreenGui.IgnoreGuiInset = true
+
+    -- Reduzir tamanho da janela da Kavo UI para caber dentro do scrollingFrame
+    local mainWindow = kavoScreenGui:FindFirstChildWhichIsA("Frame")
+    if mainWindow then
+        mainWindow.Size = UDim2.new(1, 0, 1, 0)
+        mainWindow.Position = UDim2.new(0, 0, 0, 0)
+        mainWindow.ClipsDescendants = false
+    end
+end
+
+-- Toggle abrir/fechar
+local frameOpen = false
+toggleButton.MouseButton1Click:Connect(function()
+    frameOpen = not frameOpen
+    mainFrame.Visible = frameOpen
+    -- Muda cor para indicar aberto/fechado
+    if frameOpen then
+        toggleButton.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    else
+        toggleButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
     end
 end)
 
--- Criando as Tabs normalmente
+-- Criar suas abas e toggles normalmente, por exemplo:
+
 local TabMain = Window:NewTab("Main")
-local TabFarm = Window:NewTab("Auto Farm")
-local TabBoss = Window:NewTab("Bosses")
-local TabMastery = Window:NewTab("Mastery")
-local TabTP = Window:NewTab("Teleport")
-local TabMisc = Window:NewTab("Misc")
-local TabVisual = Window:NewTab("Visual")
-
--- Para o conteúdo rolável, Kavo UI não tem scroll nativo nas tabs, mas as tabs geralmente têm bastante espaço.
--- Se precisar de muitos elementos, a Kavo UI já adiciona um scrollbar automaticamente.
--- Se quiser um container rolável dentro de uma tab, precisaríamos criar um ScrollingFrame manualmente.
--- Mas como o Kavo UI já trata isso, vamos manter assim para simplicidade.
-
--- Fast Attack
 TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
     _G.FastAttack = v
     while _G.FastAttack do
-        -- Coloque seu código de ataque rápido aqui
+        -- Seu código aqui
         wait()
     end
 end)
 
--- Auto Kill Boss
-TabBoss:NewDropdown("Selecionar Boss", "Escolha um Boss para farmar", {"Boss 1", "Boss 2", "Boss 3"}, function(selected)
-    _G.SelectedBoss = selected
-end)
-TabBoss:NewToggle("Auto Kill Boss", "Ataca automaticamente o boss selecionado", function(v)
-    _G.AutoKillBoss = v
-    while _G.AutoKillBoss do
-        -- Código para atacar boss automaticamente
-        wait()
-    end
-end)
-
--- Auto Farm Mastery
-TabMastery:NewToggle("Auto Farm Mastery", "Farmar maestria automaticamente", function(v)
-    _G.FarmMastery = v
-    while _G.FarmMastery do
-        -- Código para farmar maestria
-        wait()
-    end
-end)
-
--- Sniper de Frutas
-TabMisc:NewToggle("Sniper de Frutas", "Pega frutas automaticamente do mapa", function(v)
-    _G.FruitSniper = v
-    while _G.FruitSniper do
-        -- Código para pegar frutas automaticamente
-        wait()
-    end
-end)
-
--- Teleporte para ilhas
-TabTP:NewButton("Ir para Sky Island", "Teleporta para Sky Island", function()
-    game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-7900, 5587, -2212))
-end)
-
--- Trocar Sea
-TabTP:NewDropdown("Trocar Sea", "Escolha um Sea", {"First", "Second", "Third"}, function(sea)
-    local seas = {
-        ["First"] = 2753915549,
-        ["Second"] = 4442272183,
-        ["Third"] = 7449423635
-    }
-    if seas[sea] then
-        game:GetService("TeleportService"):Teleport(seas[sea], game.Players.LocalPlayer)
-    end
-end)
-
--- Visual ESP
-TabVisual:NewToggle("Mostrar Jogadores", "Mostra todos os jogadores com ESP", function(v)
-    _G.ShowPlayersESP = v
-    while _G.ShowPlayersESP do
-        -- Código para mostrar jogadores
-        wait()
-    end
-end)
-
-TabVisual:NewToggle("Mostrar Frutas", "Mostra todas as frutas no mapa", function(v)
-    _G.ShowFruitsESP = v
-    while _G.ShowFruitsESP do
-        -- Código para mostrar frutas
-        wait()
-    end
-end)
+-- Repita seu código normalmente para criar o resto das abas etc.
