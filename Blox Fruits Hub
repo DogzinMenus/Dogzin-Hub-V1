@@ -1,3 +1,4 @@
+
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("DogzinHub V1 - Blox Fruits", "Ocean")
 
@@ -13,76 +14,102 @@ local TabVisual = Window:NewTab("Visual")
 -- Fast Attack
 TabMain:NewToggle("Ativar Fast Attack", "Ativa ataques rápidos", function(v)
     _G.FastAttack = v
-    while _G.FastAttack do
-        local player = game.Players.LocalPlayer
-        local tool = player.Character:FindFirstChildOfClass("Tool")
-        if tool then
-            for i = 1, 3 do
-                tool:Activate()
-                wait(0.1)
+    task.spawn(function()
+        while _G.FastAttack and task.wait() do
+            local player = game.Players.LocalPlayer
+            if player and player.Character then
+                local tool = player.Character:FindFirstChildOfClass("Tool")
+                if tool then
+                    for i = 1, 3 do
+                        tool:Activate()
+                        task.wait(0.1)
+                    end
+                end
             end
         end
-        wait()
-    end
+    end)
 end)
 
 -- Auto Kill Boss
-TabBoss:NewDropdown("Selecionar Boss", "Escolha um Boss para farmar", {"Bandit Boss", "Mob Leader", "Saber Expert"}, function(selected)
+local bossList = {"Bandit Boss", "Mob Leader", "Saber Expert"}
+TabBoss:NewDropdown("Selecionar Boss", "Escolha um Boss para farmar", bossList, function(selected)
     _G.SelectedBoss = selected
 end)
 
 TabBoss:NewToggle("Auto Kill Boss", "Ataca automaticamente o boss selecionado", function(v)
     _G.AutoKillBoss = v
-    while _G.AutoKillBoss and _G.SelectedBoss do
-        local boss = nil
-        for _, mob in pairs(workspace.Enemies:GetChildren()) do
-            if mob.Name == _G.SelectedBoss and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
-                boss = mob
-                break
+    task.spawn(function()
+        while _G.AutoKillBoss and _G.SelectedBoss and task.wait() do
+            local enemies = workspace:FindFirstChild("Enemies")
+            if not enemies then continue end
+
+            local boss = nil
+            for _, mob in pairs(enemies:GetChildren()) do
+                if mob.Name == _G.SelectedBoss and mob:FindFirstChild("HumanoidRootPart") and mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
+                    boss = mob
+                    break
+                end
+            end
+
+            if boss then
+                local char = game.Players.LocalPlayer.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    char.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then tool:Activate() end
+                end
             end
         end
-        if boss then
-            game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = boss.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-            local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool then tool:Activate() end
-        end
-        wait()
-    end
+    end)
 end)
 
 -- Auto Farm Mastery
 TabMastery:NewToggle("Auto Farm Mastery", "Farmar maestria automaticamente", function(v)
     _G.FarmMastery = v
-    while _G.FarmMastery do
-        for _, mob in pairs(workspace.Enemies:GetChildren()) do
-            if mob:FindFirstChild("Humanoid") and mob.Humanoid.Health > 0 then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
-                local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if tool then tool:Activate() end
-                wait(0.2)
+    task.spawn(function()
+        while _G.FarmMastery and task.wait() do
+            local enemies = workspace:FindFirstChild("Enemies")
+            if not enemies then continue end
+
+            for _, mob in pairs(enemies:GetChildren()) do
+                if mob:FindFirstChild("Humanoid") and mob:FindFirstChild("HumanoidRootPart") and mob.Humanoid.Health > 0 then
+                    local char = game.Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = mob.HumanoidRootPart.CFrame * CFrame.new(0, 10, 0)
+                        local tool = char:FindFirstChildOfClass("Tool")
+                        if tool then tool:Activate() end
+                    end
+                    task.wait(0.2)
+                end
             end
         end
-        wait()
-    end
+    end)
 end)
 
 -- Sniper de Frutas
 TabMisc:NewToggle("Sniper de Frutas", "Pega frutas automaticamente do mapa", function(v)
     _G.FruitSniper = v
-    while _G.FruitSniper do
-        for _, fruta in pairs(game.Workspace:GetChildren()) do
-            if fruta:IsA("Tool") and fruta:FindFirstChild("Handle") and fruta.Name:match("Fruit") then
-                game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = fruta.Handle.CFrame
-                wait(1)
+    task.spawn(function()
+        while _G.FruitSniper and task.wait(5) do
+            for _, fruta in pairs(workspace:GetChildren()) do
+                if fruta:IsA("Tool") and fruta:FindFirstChild("Handle") and fruta.Name:lower():match("fruit") then
+                    local char = game.Players.LocalPlayer.Character
+                    if char and char:FindFirstChild("HumanoidRootPart") then
+                        char.HumanoidRootPart.CFrame = fruta.Handle.CFrame
+                        task.wait(1)
+                    end
+                end
             end
         end
-        wait(5)
-    end
+    end)
 end)
 
 -- Teleporte para ilhas
 TabTP:NewButton("Ir para Sky Island", "Teleporta para Sky Island", function()
-    game.Players.LocalPlayer.Character:MoveTo(Vector3.new(-7900, 5587, -2212))
+    local char = game.Players.LocalPlayer.Character
+    if char then
+        char:MoveTo(Vector3.new(-7900, 5587, -2212))
+    end
 end)
 
 -- Trocar Sea
@@ -97,41 +124,50 @@ TabTP:NewDropdown("Trocar Sea", "Escolha um Sea", {"First", "Second", "Third"}, 
     end
 end)
 
--- Visual ESP
+-- Visual ESP Jogadores
 TabVisual:NewToggle("Mostrar Jogadores", "Mostra todos os jogadores com ESP", function(v)
     _G.ShowPlayersESP = v
-    while _G.ShowPlayersESP do
-        for _, p in pairs(game.Players:GetPlayers()) do
-            if p ~= game.Players.LocalPlayer and p.Character and not p.Character:FindFirstChild("ESP") then
-                local billboard = Instance.new("BillboardGui", p.Character)
-                billboard.Name = "ESP"
-                billboard.Size = UDim2.new(0, 100, 0, 40)
-                billboard.Adornee = p.Character:WaitForChild("Head")
-                billboard.AlwaysOnTop = true
-                local label = Instance.new("TextLabel", billboard)
-                label.Text = p.Name
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.BackgroundTransparency = 1
-                label.TextColor3 = Color3.new(1, 1, 1)
-                label.TextScaled = true
+    task.spawn(function()
+        while _G.ShowPlayersESP and task.wait(3) do
+            for _, p in pairs(game.Players:GetPlayers()) do
+                if p ~= game.Players.LocalPlayer and p.Character and not p.Character:FindFirstChild("ESP") then
+                    local billboard = Instance.new("BillboardGui", p.Character)
+                    billboard.Name = "ESP"
+                    billboard.Size = UDim2.new(0, 100, 0, 40)
+                    billboard.Adornee = p.Character:FindFirstChild("Head")
+                    billboard.AlwaysOnTop = true
+                    local label = Instance.new("TextLabel", billboard)
+                    label.Text = p.Name
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.TextColor3 = Color3.new(1, 1, 1)
+                    label.TextScaled = true
+                end
             end
         end
-        wait(3)
-    end
+    end)
 end)
 
+-- Visual ESP Frutas
 TabVisual:NewToggle("Mostrar Frutas", "Mostra todas as frutas no mapa", function(v)
     _G.ShowFruitsESP = v
-    while _G.ShowFruitsESP do
-        for _, obj in pairs(workspace:GetChildren()) do
-            if obj:IsA("Tool") and obj.Name:match("Fruit") and not obj:FindFirstChild("ESP") then
-                local esp = Instance.new("BillboardGui", obj)
-                esp.Name = "ESP"
-                esp.Size = UDim2.new(0, 100, 0, 40)
-                esp.Adornee = obj:FindFirstChild("Handle")
-                esp.AlwaysOnTop = true
-                local label = Instance.new("TextLabel", esp)
-                label.Text = obj.Name
-                label.Size = UDim2.new(1, 0, 1, 0)
-                label.BackgroundTransparency = 1
-                label.TextColor3 = Color3.fromRGB(
+    task.spawn(function()
+        while _G.ShowFruitsESP and task.wait(3) do
+            for _, obj in pairs(workspace:GetChildren()) do
+                if obj:IsA("Tool") and obj.Name:lower():match("fruit") and not obj:FindFirstChild("ESP") then
+                    local esp = Instance.new("BillboardGui", obj)
+                    esp.Name = "ESP"
+                    esp.Size = UDim2.new(0, 100, 0, 40)
+                    esp.Adornee = obj:FindFirstChild("Handle")
+                    esp.AlwaysOnTop = true
+                    local label = Instance.new("TextLabel", esp)
+                    label.Text = obj.Name
+                    label.Size = UDim2.new(1, 0, 1, 0)
+                    label.BackgroundTransparency = 1
+                    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+                    label.TextScaled = true
+                end
+            end
+        end
+    end)
+end)
