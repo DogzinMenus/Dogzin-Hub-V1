@@ -1,54 +1,46 @@
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("DogzinHub V1 - Funcional", "Ocean")
 
--- Espera carregar o Kavo UI e pega o Frame principal da UI (que é filho do ScreenGui)
 local mainGui = game:GetService("CoreGui"):WaitForChild("KavoUI") or game.Players.LocalPlayer.PlayerGui:WaitForChild("KavoUI")
 local mainFrame = mainGui:FindFirstChildWhichIsA("Frame", true)
 
--- Torna o frame arrastável
+-- Torna arrastável
 mainFrame.Active = true
 mainFrame.Draggable = true
 
--- Cria um ScrollingFrame dentro do mainFrame para conteúdo rolável
-local scrollingFrame = Instance.new("ScrollingFrame")
-scrollingFrame.Name = "ScrollingContent"
-scrollingFrame.Parent = mainFrame
-scrollingFrame.BackgroundTransparency = 1
-scrollingFrame.Size = UDim2.new(1, -20, 1, -40) -- Ajuste o tamanho para caber dentro do frame
-scrollingFrame.Position = UDim2.new(0, 10, 0, 30)
-scrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0) -- Altura grande para ativar a rolagem
-scrollingFrame.ScrollBarThickness = 6
-scrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+-- Criar botão minimizar
+local minimizeButton = Instance.new("TextButton")
+minimizeButton.Parent = mainFrame
+minimizeButton.Text = "-"
+minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+minimizeButton.Position = UDim2.new(1, -35, 0, 5)
+minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+minimizeButton.TextColor3 = Color3.new(1,1,1)
+minimizeButton.Font = Enum.Font.SourceSansBold
+minimizeButton.TextScaled = true
+minimizeButton.AutoButtonColor = true
 
--- Move os filhos do mainFrame para dentro do scrollingFrame
-for _, child in pairs(mainFrame:GetChildren()) do
-    if child:IsA("GuiObject") and child ~= scrollingFrame then
-        child.Parent = scrollingFrame
-    end
-end
+local isMinimized = false
 
--- Abas e seções continuam normais
-local MainTab = Window:NewTab("Main")
-local MainSection = MainTab:NewSection("Funções principais")
-
-local Settings = { FastAttack = false }
-
-MainSection:NewToggle("Fast Attack", "Ataca rapidamente com a arma equipada", function(value)
-    Settings.FastAttack = value
-end)
-
-spawn(function()
-    while task.wait() do
-        if Settings.FastAttack then
-            local Player = game.Players.LocalPlayer
-            local Tool = Player.Character and Player.Character:FindFirstChildOfClass("Tool")
-            if Tool then
-                pcall(function()
-                    for i = 1, 3 do
-                        Tool:Activate()
-                    end
-                end)
+minimizeButton.MouseButton1Click:Connect(function()
+    if isMinimized then
+        -- Restaurar tamanho e mostrar filhos
+        mainFrame.Size = UDim2.new(0, 400, 0, 400)
+        for _, child in pairs(mainFrame:GetChildren()) do
+            if child ~= minimizeButton then
+                child.Visible = true
             end
         end
+        isMinimized = false
+    else
+        -- Minimizar: esconder filhos (menos botão) e diminuir tamanho
+        for _, child in pairs(mainFrame:GetChildren()) do
+            if child ~= minimizeButton then
+                child.Visible = false
+            end
+        end
+        mainFrame.Size = UDim2.new(0, 100, 0, 40)
+        minimizeButton.Visible = true -- botão fica visível
+        isMinimized = true
     end
 end)
