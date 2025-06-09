@@ -1,32 +1,42 @@
--- Carregar Kaio UI
 local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
 local Window = Library.CreateLib("DogzinHub V1 - Funcional", "Ocean")
 
--- Referência do frame principal da UI (Kaio UI usa um ScreenGui com um Frame dentro)
+-- Espera carregar o Kavo UI e pega o Frame principal da UI (que é filho do ScreenGui)
 local mainGui = game:GetService("CoreGui"):WaitForChild("KavoUI") or game.Players.LocalPlayer.PlayerGui:WaitForChild("KavoUI")
-local dragFrame = mainGui:FindFirstChildWhichIsA("Frame", true)
+local mainFrame = mainGui:FindFirstChildWhichIsA("Frame", true)
 
 -- Torna o frame arrastável
-if dragFrame then
-    dragFrame.Active = true
-    dragFrame.Draggable = true
+mainFrame.Active = true
+mainFrame.Draggable = true
+
+-- Cria um ScrollingFrame dentro do mainFrame para conteúdo rolável
+local scrollingFrame = Instance.new("ScrollingFrame")
+scrollingFrame.Name = "ScrollingContent"
+scrollingFrame.Parent = mainFrame
+scrollingFrame.BackgroundTransparency = 1
+scrollingFrame.Size = UDim2.new(1, -20, 1, -40) -- Ajuste o tamanho para caber dentro do frame
+scrollingFrame.Position = UDim2.new(0, 10, 0, 30)
+scrollingFrame.CanvasSize = UDim2.new(0, 0, 5, 0) -- Altura grande para ativar a rolagem
+scrollingFrame.ScrollBarThickness = 6
+scrollingFrame.VerticalScrollBarInset = Enum.ScrollBarInset.Always
+
+-- Move os filhos do mainFrame para dentro do scrollingFrame
+for _, child in pairs(mainFrame:GetChildren()) do
+    if child:IsA("GuiObject") and child ~= scrollingFrame then
+        child.Parent = scrollingFrame
+    end
 end
 
--- Abas
+-- Abas e seções continuam normais
 local MainTab = Window:NewTab("Main")
 local MainSection = MainTab:NewSection("Funções principais")
 
--- Configuração
-local Settings = {
-    FastAttack = false
-}
+local Settings = { FastAttack = false }
 
--- Fast Attack
 MainSection:NewToggle("Fast Attack", "Ataca rapidamente com a arma equipada", function(value)
     Settings.FastAttack = value
 end)
 
--- Loop de ataque rápido
 spawn(function()
     while task.wait() do
         if Settings.FastAttack then
