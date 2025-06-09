@@ -1,21 +1,28 @@
-local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
-local Window = Library.CreateLib("DogzinHub V1 - Funcional", "Ocean")
+loadstring(game:HttpGet("https://raw.githubusercontent.com/stylemakeritosh/Ace/refs/heads/main/NelRinV2"))()
 
 local mainGui = game:GetService("CoreGui"):WaitForChild("KavoUI") or game.Players.LocalPlayer.PlayerGui:WaitForChild("KavoUI")
 local mainFrame = mainGui:FindFirstChildWhichIsA("Frame", true)
 
--- Torna arrastável
+-- Torna o frame arrastável
 mainFrame.Active = true
 mainFrame.Draggable = true
 
--- Criar botão minimizar
+-- Garante que o frame fique reto (sem rotação)
+mainFrame.Rotation = 0
+mainFrame:GetPropertyChangedSignal("Rotation"):Connect(function()
+    if mainFrame.Rotation ~= 0 then
+        mainFrame.Rotation = 0
+    end
+end)
+
+-- Cria o botão minimizar
 local minimizeButton = Instance.new("TextButton")
 minimizeButton.Parent = mainFrame
 minimizeButton.Text = "-"
 minimizeButton.Size = UDim2.new(0, 30, 0, 30)
 minimizeButton.Position = UDim2.new(1, -35, 0, 5)
 minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-minimizeButton.TextColor3 = Color3.new(1,1,1)
+minimizeButton.TextColor3 = Color3.new(1, 1, 1)
 minimizeButton.Font = Enum.Font.SourceSansBold
 minimizeButton.TextScaled = true
 minimizeButton.AutoButtonColor = true
