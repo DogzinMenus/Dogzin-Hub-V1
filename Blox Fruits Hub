@@ -1,53 +1,87 @@
-loadstring(game:HttpGet("https://raw.githubusercontent.com/stylemakeritosh/Ace/refs/heads/main/NelRinV2"))()
+local Scripts = {
+	{
+		PlacesIds = {2753915549, 4442272183, 7449423635},
+		Path = "BloxFruits.luau"
+	},
+	{
+		PlacesIds = {10260193230},
+		Path = "MemeSea.luau"
+	}
+}
 
-local mainGui = game:GetService("CoreGui"):WaitForChild("KavoUI") or game.Players.LocalPlayer.PlayerGui:WaitForChild("KavoUI")
-local mainFrame = mainGui:FindFirstChildWhichIsA("Frame", true)
+local fetcher, urls = {}, {}
 
--- Torna o frame arrastável
-mainFrame.Active = true
-mainFrame.Draggable = true
+urls.Owner = "https://raw.githubusercontent.com/tlredz/";
+urls.Repository = `{ urls.Owner }Scripts/refs/heads/main/`;
+urls.Translator = `{ urls.Repository }Translator/`;
+urls.Utils = `{ urls.Repository }Utils/`;
 
--- Garante que o frame fique reto (sem rotação)
-mainFrame.Rotation = 0
-mainFrame:GetPropertyChangedSignal("Rotation"):Connect(function()
-    if mainFrame.Rotation ~= 0 then
-        mainFrame.Rotation = 0
-    end
-end)
+do
+	local _ENV = (getgenv or getrenv or getfenv)()
+	
+	if _ENV.rz_error_message then
+		_ENV.rz_error_message:Destroy()
+	end
+	
+	local identifyexecutor = identifyexecutor or (function() return "Unknown" end)
+	
+	local function CreateMessageError(Text)
+		_ENV.loadedFarm = nil
+		_ENV.OnFarm = false
+		
+		local Message = Instance.new("Message", workspace)
+		Message.Text = string.gsub(Text, urls.Owner, "")
+		_ENV.rz_error_message = Message
+		
+		error(Text, 2)
+	end
+	
+	local function formatUrl(Url)
+		for string, path in urls do
+			if Url:find("{" .. string .. "}") then
+				return Url:gsub("{" .. string .. "}", path)
+			end
+		end
+		
+		return Url
+	end
+	
+	function fetcher.get(Url)
+		local success, response = pcall(function()
+			return game:HttpGet(formatUrl(Url))
+		end)
+		
+		if success then
+			return response
+		else
+			CreateMessageError(`[1] [{ identifyexecutor() }] failed to get http/url/raw: { Url }\n>>{ response }<<`)
+		end
+	end
+	
+	function fetcher.load(Url, concat)
+		local raw = fetcher.get(Url) .. (if concat then concat else "")
+		local execute, error = loadstring(raw)
+		
+		if type(execute) ~= "function" then
+			CreateMessageError(`[2] [{ identifyexecutor() }] sintax error: { Url }\n>>{ error }<<`)
+		else
+			return execute
+		end
+	end
+end
 
--- Cria o botão minimizar
-local minimizeButton = Instance.new("TextButton")
-minimizeButton.Parent = mainFrame
-minimizeButton.Text = "-"
-minimizeButton.Size = UDim2.new(0, 30, 0, 30)
-minimizeButton.Position = UDim2.new(1, -35, 0, 5)
-minimizeButton.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-minimizeButton.TextColor3 = Color3.new(1, 1, 1)
-minimizeButton.Font = Enum.Font.SourceSansBold
-minimizeButton.TextScaled = true
-minimizeButton.AutoButtonColor = true
+local function IsPlace(Data)
+	if Data.PlacesIds and table.find(Data.PlacesIds, game.PlaceId) then
+		return true
+	elseif Data.GameId and game.GameId == Data.GameId then
+		return true
+	end
+	
+	return false
+end
 
-local isMinimized = false
-
-minimizeButton.MouseButton1Click:Connect(function()
-    if isMinimized then
-        -- Restaurar tamanho e mostrar filhos
-        mainFrame.Size = UDim2.new(0, 400, 0, 400)
-        for _, child in pairs(mainFrame:GetChildren()) do
-            if child ~= minimizeButton then
-                child.Visible = true
-            end
-        end
-        isMinimized = false
-    else
-        -- Minimizar: esconder filhos (menos botão) e diminuir tamanho
-        for _, child in pairs(mainFrame:GetChildren()) do
-            if child ~= minimizeButton then
-                child.Visible = false
-            end
-        end
-        mainFrame.Size = UDim2.new(0, 100, 0, 40)
-        minimizeButton.Visible = true -- botão fica visível
-        isMinimized = true
-    end
-end)
+for _, Data in Scripts do
+	if IsPlace(Data) then
+		return fetcher.load("{Repository}Games/" .. Data.Path)(fetcher, ...)
+	end
+end
