@@ -9,7 +9,7 @@ local Lighting = game:GetService("Lighting")
 local player = Players.LocalPlayer
 
 -- Variáveis
-local noclip, infjump, clicktp, esp = false, false, false, false
+local noclip, infjump, clicktp, esp, flying = false, false, false, false, false
 local walkspeed, jumppower = 16, 50
 local tabs, currentTab = {}, nil
 
@@ -28,7 +28,7 @@ open.TextScaled = true
 Instance.new("UICorner", open)
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,500,0,400) -- mais largo para barra lateral + conteúdo
+frame.Size = UDim2.new(0,500,0,400)
 frame.Position = UDim2.new(0.5,-250,0.5,-200)
 frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
 frame.Visible = false
@@ -54,25 +54,37 @@ close.TextScaled = true
 close.Font = Enum.Font.SourceSansBold
 Instance.new("UICorner", close)
 
--- Barra lateral para botões das abas
-local tabButtons = Instance.new("Frame", frame)
+-- Barra lateral das tabs (rolável)
+local tabButtons = Instance.new("ScrollingFrame", frame)
 tabButtons.Size = UDim2.new(0, 110, 1, -35)
 tabButtons.Position = UDim2.new(0, 0, 0, 35)
 tabButtons.BackgroundColor3 = Color3.fromRGB(10,10,10)
+tabButtons.CanvasSize = UDim2.new(0, 0, 0, 500)
+tabButtons.ScrollBarThickness = 5
 Instance.new("UICorner", tabButtons)
 
--- Conteúdo das abas (área principal)
+local tabLayout = Instance.new("UIListLayout", tabButtons)
+tabLayout.Padding = UDim.new(0, 5)
+tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- Conteúdo das tabs (área principal)
 local content = Instance.new("Frame", frame)
 content.Size = UDim2.new(1, -110 - 20, 1, -90)
 content.Position = UDim2.new(0, 110 + 10, 0, 80)
 content.BackgroundColor3 = Color3.fromRGB(20,20,20)
 Instance.new("UICorner", content)
 
+-- Função de Notificação
+local function Notif(text)
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {Title = "DataBreakerZ", Text = text, Duration = 3})
+    end)
+end
+
 -- Função para criar abas
 local function CreateTab(name)
     local btn = Instance.new("TextButton", tabButtons)
-    btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, (#tabButtons:GetChildren() - 1) * 40)
+    btn.Size = UDim2.new(1, -10, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Text = name
@@ -82,8 +94,8 @@ local function CreateTab(name)
 
     local tab = Instance.new("ScrollingFrame", content)
     tab.Size = UDim2.new(1, 0, 1, 0)
-    tab.CanvasSize = UDim2.new(0, 0, 5, 0)
-    tab.ScrollBarThickness = 6
+    tab.CanvasSize = UDim2.new(0, 0, 0, 500)
+    tab.ScrollBarThickness = 5
     tab.BackgroundTransparency = 1
     tab.Visible = false
 
@@ -101,7 +113,7 @@ local function CreateTab(name)
     return tab
 end
 
--- Função para criar botões dentro das abas
+-- Função para criar botões nas abas
 local function CreateButton(tab, text, callback)
     local btn = Instance.new("TextButton", tab)
     btn.Size = UDim2.new(1, 0, 0, 35)
@@ -110,11 +122,11 @@ local function CreateButton(tab, text, callback)
     btn.Text = text
     btn.TextScaled = true
     btn.Font = Enum.Font.SourceSansBold
-    btn.MouseButton1Click:Connect(callback)
     Instance.new("UICorner", btn)
+    btn.MouseButton1Click:Connect(callback)
 end
 
--- Função para criar TextBox com label dentro das abas
+-- Função para criar TextBox com label
 local function CreateTextBox(tab, labelText, defaultText, callback)
     local holder = Instance.new("Frame", tab)
     holder.Size = UDim2.new(1, 0, 0, 35)
@@ -149,59 +161,16 @@ local function CreateTextBox(tab, labelText, defaultText, callback)
     end)
 end
 
--- Criação das abas
+-- Criar abas
 local tabNames = {
     "Main", "Player", "Visual", "Movement", "Utility",
-    "Sky & Atmosphere", "Trolling", "Crash", "Spawn/Entities", "Fun Extra"
+    "Sky & Atmosphere", "Trolling", "Crash", "Spawn/Entities", "Fun Extra", "Remains"
 }
 for _, name in ipairs(tabNames) do
     CreateTab(name)
 end
 tabs["Main"].Visible = true
 currentTab = tabs["Main"]
-
--- Sistema Open/Close
-open.MouseButton1Click:Connect(function() frame.Visible = not frame.Visible end)
-close.MouseButton1Click:Connect(function() frame.Visible = false end)
-
--- Notificação auxiliar
-local function Notif(text)
-    StarterGui:SetCore("SendNotification", {Title = "DataBreakerZ", Text = text, Duration = 3})
-end
-
--- Funções principais do cheat abaixo
-
--- Noclip
-RunService.Stepped:Connect(function()
-    if noclip and player.Character then
-        for _,v in pairs(player.Character:GetDescendants()) do
-            if v:IsA("BasePart") then v.CanCollide = false end
-        end
-    end
-end)
-
--- Infinite Jump
-UserInputService.JumpRequest:Connect(function()
-    if infjump and player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-    end
-end)
-
--- Click TP
-local mouse = player:GetMouse()
-mouse.Button1Down:Connect(function()
-    if clicktp and mouse.Target and player.Character then
-        player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0))
-    end
-end)
-
--- Atualiza WalkSpeed e JumpPower
-RunService.RenderStepped:Connect(function()
-    if player.Character and player.Character:FindFirstChild("Humanoid") then
-        player.Character.Humanoid.WalkSpeed = walkspeed
-        player.Character.Humanoid.JumpPower = jumppower
-    end
-end)
 
 -- === Aba Main ===
 local main = tabs["Main"]
@@ -217,7 +186,6 @@ CreateButton(main, "Toggle Click TP", function()
     clicktp = not clicktp
     Notif("Click TP "..(clicktp and "ativado" or "desativado"))
 end)
-
 CreateTextBox(main, "WalkSpeed", tostring(walkspeed), function(val)
     walkspeed = val
     Notif("WalkSpeed: "..val)
@@ -304,7 +272,7 @@ CreateButton(utility, "Open Chat", function()
     StarterGui:SetCore("ChatMakeSystemMessage",{Text="DataBreakerZ Activated!", Color=Color3.fromRGB(255,0,0)})
 end)
 CreateButton(utility, "Copy Discord Link", function()
-    setclipboard("https://discord.gg/seulink") -- só funciona em exploits que permitem setclipboard
+    setclipboard("https://discord.gg/seulink")
     Notif("Link copiado para a área de transferência")
 end)
 CreateButton(utility, "Clear Workspace Debris", function()
@@ -388,6 +356,10 @@ CreateButton(crash, "Clear Crash Parts", function()
 end)
 CreateButton(crash, "Flood Chat", function()
     for i=1,10 do
+        StarterGui:Set
+        -- Continuação Aba Crash
+CreateButton(crash, "Flood Chat", function()
+    for i=1,10 do
         StarterGui:SetCore("ChatMakeSystemMessage", {Text="DataBreakerZ Flood!", Color=Color3.fromRGB(255,0,0)})
     end
     Notif("Flood de chat executado")
@@ -449,5 +421,135 @@ CreateButton(fun, "Fake Chat Message", function()
     Notif("Mensagem falsa enviada no chat")
 end)
 
--- Mensagem de carregamento
+-- === Aba Remains ===
+local remains = tabs["Remains"]
+
+-- Fake Lag Toggle
+local fakeLagActive = false
+CreateButton(remains, "Toggle Fake Lag", function()
+    fakeLagActive = not fakeLagActive
+    Notif("Fake Lag "..(fakeLagActive and "ativado" or "desativado"))
+end)
+
+-- Aimbot
+local aimbotActive = false
+local targetName = ""
+
+-- Caixa para digitar nome do player para Aimbot
+CreateTextBox(remains, "Aimbot Target", "", function(val)
+    targetName = tostring(val)
+    Notif("Aimbot alvo definido: "..targetName)
+end)
+
+CreateButton(remains, "Toggle Aimbot", function()
+    aimbotActive = not aimbotActive
+    Notif("Aimbot "..(aimbotActive and "ativado" or "desativado"))
+end)
+
+-- Fly toggle
+local flySpeed = 50
+local flyingConnection = nil
+CreateButton(remains, "Toggle Fly", function()
+    flying = not flying
+    if flying then
+        local char = player.Character
+        if not char then flying = false return end
+        local hrp = char:FindFirstChild("HumanoidRootPart")
+        if not hrp then flying = false return end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if not hum then flying = false return end
+        hum.PlatformStand = true
+
+        flyingConnection = RunService.Heartbeat:Connect(function()
+            local moveDir = Vector3.new()
+            if UserInputService:IsKeyDown(Enum.KeyCode.W) then
+                moveDir = moveDir + workspace.CurrentCamera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.S) then
+                moveDir = moveDir - workspace.CurrentCamera.CFrame.LookVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.A) then
+                moveDir = moveDir - workspace.CurrentCamera.CFrame.RightVector
+            end
+            if UserInputService:IsKeyDown(Enum.KeyCode.D) then
+                moveDir = moveDir + workspace.CurrentCamera.CFrame.RightVector
+            end
+            hrp.Velocity = moveDir.Unit * flySpeed
+            if moveDir.Magnitude == 0 then
+                hrp.Velocity = Vector3.new(0,0,0)
+            end
+        end)
+        Notif("Fly ativado")
+    else
+        local char = player.Character
+        if char then
+            local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then hum.PlatformStand = false end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
+            if hrp then hrp.Velocity = Vector3.new(0,0,0) end
+        end
+        if flyingConnection then
+            flyingConnection:Disconnect()
+            flyingConnection = nil
+        end
+        Notif("Fly desativado")
+    end
+end)
+
+-- === Loops principais ===
+
+-- Noclip loop
+RunService.Stepped:Connect(function()
+    if noclip and player.Character then
+        for _,v in pairs(player.Character:GetDescendants()) do
+            if v:IsA("BasePart") then v.CanCollide = false end
+        end
+    end
+end)
+
+-- Infinite Jump
+UserInputService.JumpRequest:Connect(function()
+    if infjump and player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+    end
+end)
+
+-- Click TP
+local mouse = player:GetMouse()
+mouse.Button1Down:Connect(function()
+    if clicktp and mouse.Target and player.Character then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0))
+    end
+end)
+
+-- Atualiza WalkSpeed e JumpPower
+RunService.RenderStepped:Connect(function()
+    if player.Character and player.Character:FindFirstChild("Humanoid") then
+        player.Character.Humanoid.WalkSpeed = walkspeed
+        player.Character.Humanoid.JumpPower = jumppower
+    end
+end)
+
+-- Aimbot loop
+RunService.RenderStepped:Connect(function()
+    if aimbotActive and targetName ~= "" and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        local targetPlayer = Players:FindFirstChild(targetName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            local hrp = player.Character.HumanoidRootPart
+            local targetPos = targetPlayer.Character.HumanoidRootPart.Position
+            local direction = (targetPos - hrp.Position).Unit
+            hrp.CFrame = CFrame.new(hrp.Position, targetPos)
+        end
+    end
+end)
+
+-- Sistema Open/Close
+open.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
+close.MouseButton1Click:Connect(function()
+    frame.Visible = false
+end)
+
+-- Notificação de carregamento
 Notif("DataBreakerZ Menu Carregado!")
