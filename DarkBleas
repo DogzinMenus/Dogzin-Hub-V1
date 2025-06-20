@@ -1,7 +1,5 @@
-Mensagem falsa enviada no chat")
-end)
-
--- Mensagem
+w(0.35, 0, 0.8, 0)
+    box.Posit
 -- DataBreakerZ Menu Otimizado - By DogzinGhost_YT
 
 -- Serviços
@@ -450,139 +448,13 @@ end)
 CreateButton(fun, "Toggle Sit", function()
     local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
     if hum then
-        hum.Sit =-- DataBreakerZ Menu Otimizado - By DogzinGhost_YT
+        hum.Sit = not hum.Sit
+        Notif("Sentar toggled")
+    end
+end)
+CreateButton(fun, "Fake Chat Message", function()
+    StarterGui:SetCore("ChatMakeSystemMessage",{Text="DataBreakerZ é o melhor exploit!", Color=Color3.fromRGB(255,0,0)})
+    Notif("Mensagem falsa enviada no chat")
+end)
 
--- Serviços
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
-local Lighting = game:GetService("Lighting")
-local player = Players.LocalPlayer
-
--- Variáveis
-local noclip, infjump, clicktp, esp = false, false, false, false
-local walkspeed, jumppower = 16, 50
-local tabs, currentTab = {}, nil
-
--- GUI Base
-local gui = Instance.new("ScreenGui", player.PlayerGui)
-gui.Name = "DataBreakerZ"
-gui.ResetOnSpawn = false
-
-local open = Instance.new("TextButton", gui)
-open.Size = UDim2.new(0,50,0,50)
-open.Position = UDim2.new(0,20,0.5,-25)
-open.Text = "☰"
-open.BackgroundColor3 = Color3.fromRGB(30,30,30)
-open.TextColor3 = Color3.fromRGB(255,0,0)
-open.TextScaled = true
-Instance.new("UICorner", open)
-
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,500,0,400) -- mais largo para barra lateral + conteúdo
-frame.Position = UDim2.new(0.5,-250,0.5,-200)
-frame.BackgroundColor3 = Color3.fromRGB(15,15,15)
-frame.Visible = false
-frame.Active = true
-frame.Draggable = true
-Instance.new("UICorner", frame)
-
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,0,0,35)
-title.BackgroundColor3 = Color3.fromRGB(0,0,0)
-title.Text = "DataBreakerZ Menu"
-title.TextColor3 = Color3.fromRGB(255,0,0)
-title.TextScaled = true
-title.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", title)
-
-local close = Instance.new("TextButton", frame)
-close.Size = UDim2.new(0,35,0,35)
-close.Position = UDim2.new(1,-40,0,0)
-close.BackgroundColor3 = Color3.fromRGB(30,30,30)
-close.Text = "X"
-close.TextColor3 = Color3.fromRGB(255,255,255)
-close.TextScaled = true
-close.Font = Enum.Font.SourceSansBold
-Instance.new("UICorner", close)
-
--- Barra lateral para botões das abas (agora rolável)
-local tabButtons = Instance.new("ScrollingFrame", frame)
-tabButtons.Size = UDim2.new(0, 110, 1, -35)
-tabButtons.Position = UDim2.new(0, 0, 0, 35)
-tabButtons.BackgroundColor3 = Color3.fromRGB(10,10,10)
-tabButtons.ScrollBarThickness = 6
-Instance.new("UICorner", tabButtons)
-
--- Conteúdo das abas (área principal)
-local content = Instance.new("Frame", frame)
-content.Size = UDim2.new(1, -110 - 20, 1, -90)
-content.Position = UDim2.new(0, 110 + 10, 0, 80)
-content.BackgroundColor3 = Color3.fromRGB(20,20,20)
-Instance.new("UICorner", content)
-
--- Função para criar abas
-local function CreateTab(name)
-    local btn = Instance.new("TextButton", tabButtons)
-    btn.Size = UDim2.new(1, -20, 0, 35)
-    btn.Position = UDim2.new(0, 10, 0, (#tabButtons:GetChildren() - 1) * 40)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = name
-    btn.TextScaled = true
-    btn.Font = Enum.Font.SourceSansBold
-    Instance.new("UICorner", btn)
-
-    local tab = Instance.new("ScrollingFrame", content)
-    tab.Size = UDim2.new(1, 0, 1, 0)
-    tab.CanvasSize = UDim2.new(0, 0, 5, 0)
-    tab.ScrollBarThickness = 6
-    tab.BackgroundTransparency = 1
-    tab.Visible = false
-
-    local layout = Instance.new("UIListLayout", tab)
-    layout.Padding = UDim.new(0, 8)
-    layout.SortOrder = Enum.SortOrder.LayoutOrder
-
-    btn.MouseButton1Click:Connect(function()
-        if currentTab then currentTab.Visible = false end
-        tab.Visible = true
-        currentTab = tab
-    end)
-
-    tabs[name] = tab
-    return tab
-end
-
--- Função para criar botões dentro das abas
-local function CreateButton(tab, text, callback)
-    local btn = Instance.new("TextButton", tab)
-    btn.Size = UDim2.new(1, 0, 0, 35)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    btn.Text = text
-    btn.TextScaled = true
-    btn.Font = Enum.Font.SourceSansBold
-    btn.MouseButton1Click:Connect(callback)
-    Instance.new("UICorner", btn)
-end
-
--- Função para criar TextBox com label dentro das abas
-local function CreateTextBox(tab, labelText, defaultText, callback)
-    local holder = Instance.new("Frame", tab)
-    holder.Size = UDim2.new(1, 0, 0, 35)
-    holder.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    Instance.new("UICorner", holder)
-
-    local label = Instance.new("TextLabel", holder)
-    label.Size = UDim2.new(0.6, 0, 1, 0)
-    label.BackgroundTransparency = 1
-    label.Text = labelText
-    label.TextColor3 = Color3.fromRGB(255, 255, 255)
-    label.TextScaled = true
-    label.Font = Enum.Font.SourceSansBold
-
-    local box = Instance.new("TextBox", holder)
-    box.Size = UDim2.new(0.35, 0, 0.8, 0)
-    box.Posit
+-- Mensagem
